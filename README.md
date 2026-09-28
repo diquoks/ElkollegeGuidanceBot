@@ -30,25 +30,15 @@
 
 ### Docker
 
-##### Перейдите в корневую директорию
-
-##### Создайте образ
+1. Перейдите в корневую директорию
+2. Создайте образ
 
 ```shell
 docker build -t elkollege_guidance_bot .
 ```
 
-##### Запустите контейнер
+3. Запустите контейнер
 
 ```shell
 docker run -d --env-file .env --name ElkollegeGuidanceBot elkollege_guidance_bot
 ```
-
----
-
-## Контакты
-
-#### Связь с разработчиком
-
-- [Telegram для связи](https://t.me/diquoks)
-- [Почта для связи](mailto:den232titovets@yandex.ru)
