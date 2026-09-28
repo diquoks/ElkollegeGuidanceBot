@@ -108,7 +108,6 @@ class MessagesRouter(aiogram.Router):
                 )
             case states.Flow.input_phone_number:
                 if not utils.match_phone_number(message.text):
-                    # noinspection PyTypeChecker
                     current_retries_count: int = await state.get_value(
                         key=self._strings.state.input_phone_number_retries_count,
                         default=constants.DEFAULT_MATCH_RETRIES_COUNT,
@@ -147,7 +146,6 @@ class MessagesRouter(aiogram.Router):
                 )
             case states.Flow.input_email:
                 if not utils.match_email(message.text):
-                    # noinspection PyTypeChecker
                     current_retries_count: int = await state.get_value(
                         key=self._strings.state.input_email_retries_count,
                         default=constants.DEFAULT_MATCH_RETRIES_COUNT,
@@ -185,9 +183,9 @@ class MessagesRouter(aiogram.Router):
                     text=self._strings.menu.input_institution(),
                 )
             case states.Flow.input_institution:
-                # noinspection PyTypeChecker
                 current_user_type: models.UserType = await state.get_value(
                     key=self._strings.state.current_user_type,
+                    default=models.UserType.SCHOOLKID,
                 )
 
                 await state.update_data(

@@ -10,7 +10,7 @@ class AiogramDispatcher(aiogram.Dispatcher):
     _COMMANDS = [
         aiogram.types.BotCommand(
             command="/start",
-            description="Пройти профориентацию",
+            description="Пройти тестирование",
         ),
         aiogram.types.BotCommand(
             command="/export",
@@ -31,6 +31,16 @@ class AiogramDispatcher(aiogram.Dispatcher):
 
         super().__init__(
             name=self.__class__.__name__,
+        )
+
+        self.startup.register(
+            self._startup_handler,
+        )
+        self.errors.register(
+            self._error_handler,
+        )
+        self.shutdown.register(
+            self._shutdown_handler,
         )
 
         self.include_routers(*routers)

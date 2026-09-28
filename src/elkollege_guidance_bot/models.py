@@ -1,6 +1,7 @@
 import enum
 
 import pydantic
+
 import pyquoks.utils
 
 

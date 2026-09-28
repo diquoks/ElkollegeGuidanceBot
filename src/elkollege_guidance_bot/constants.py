@@ -8,8 +8,6 @@ REGEX_EMAIL = r"([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)"
 DEFAULT_MATCH_RETRIES_COUNT = 0
 MAX_MATCH_RETRIES_COUNT = 3
 
-CALL_DATA_SEPARATOR = " "
-
 AIOGRAM_IGNORED_EXCEPTIONS = (
     aiogram.exceptions.TelegramForbiddenError,
     aiogram.exceptions.TelegramRetryAfter,

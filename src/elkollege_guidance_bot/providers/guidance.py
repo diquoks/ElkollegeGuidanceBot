@@ -1,8 +1,8 @@
 import random
 
-import pyquoks.utils
 import yaml
 
+import pyquoks.utils
 from .. import models
 
 

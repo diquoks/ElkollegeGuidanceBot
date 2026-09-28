@@ -4,8 +4,8 @@ import typing
 import aiogram
 import aiogram.filters
 import aiogram.fsm.context
-import pyquoks.utils
 
+import pyquoks.utils
 from .. import states
 from ..providers import keyboards
 from ..services import logger
@@ -87,7 +87,7 @@ class CallbacksRouter(aiogram.Router):
         current_state = await state.get_state()
 
         try:
-            match call.data.split(constants.CALL_DATA_SEPARATOR):
+            match call.data.split():
                 case [
                     self._strings.callback.start,
                 ]:
@@ -168,7 +168,6 @@ class CallbacksRouter(aiogram.Router):
                     current_question = self._guidance.test.questions[current_question_index]
                     current_answer = current_question.answers[current_answer_index]
 
-                    # noinspection PyTypeChecker
                     current_profession_rating: dict = await state.get_value(
                         key=self._strings.state.professions_rating,
                         default={},
@@ -206,27 +205,24 @@ class CallbacksRouter(aiogram.Router):
                         )
                         current_timestamp = int(datetime.datetime.now().timestamp())
 
-                        # noinspection PyTypeChecker
                         current_user_type: models.UserType = await state.get_value(
                             key=self._strings.state.current_user_type,
+                            default=models.UserType.SCHOOLKID,
                         )
-                        # noinspection PyTypeChecker
                         current_full_name: str = await state.get_value(
                             key=self._strings.state.current_full_name,
+                            default="",
                         )
-                        # noinspection PyTypeChecker
                         current_phone_number: str | None = await state.get_value(
                             key=self._strings.state.current_phone_number,
                         )
-                        # noinspection PyTypeChecker
                         current_email: str | None = await state.get_value(
                             key=self._strings.state.current_email,
                         )
-                        # noinspection PyTypeChecker
                         current_institution: str = await state.get_value(
                             key=self._strings.state.current_institution,
+                            default="",
                         )
-                        # noinspection PyTypeChecker
                         current_course: str | None = await state.get_value(
                             key=self._strings.state.current_course,
                         )
