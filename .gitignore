@@ -1,6 +1,7 @@
 /.idea/
 /.venv/
 /.env
-*/db/
-*/logs/
-*/config.ini
+src/assets/
+src/db/
+src/logs/
+src/config.ini
