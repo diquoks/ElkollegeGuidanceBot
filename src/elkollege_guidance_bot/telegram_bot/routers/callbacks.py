@@ -1,4 +1,3 @@
-import datetime
 import typing
 
 import aiogram
@@ -11,7 +10,6 @@ from ..providers import keyboards
 from ..services import logger
 from ... import constants
 from ... import models
-from ...managers import database
 from ...providers import guidance
 from ...providers import strings
 
@@ -19,14 +17,12 @@ from ...providers import strings
 class CallbacksRouter(aiogram.Router):
     def __init__(
             self,
-            database_manager: database.DatabaseManager,
             guidance_provider: guidance.GuidanceProvider,
             keyboards_provider: keyboards.KeyboardsProvider,
             strings_provider: strings.StringsProvider,
             logger_service: logger.LoggerService,
             aiogram_bot: aiogram.Bot,
     ) -> None:
-        self._database = database_manager
         self._guidance = guidance_provider
         self._keyboards = keyboards_provider
         self._strings = strings_provider
@@ -93,27 +89,6 @@ class CallbacksRouter(aiogram.Router):
                 ]:
                     await state.clear()
 
-                    current_bot_name = await self._bot.get_my_name()
-
-                    await self._bot.edit_message_text(
-                        chat_id=call.message.chat.id,
-                        message_id=call.message.message_id,
-                        text=self._strings.menu.start(
-                            bot_name=current_bot_name.name,
-                        ),
-                        reply_markup=self._keyboards.start(),
-                    )
-                case [
-                    self._strings.callback.user_type,
-                    user_type,
-                ] if current_state is None:
-                    current_user_type = models.UserType(int(user_type))
-
-                    await state.update_data(
-                        data={
-                            self._strings.state.current_user_type: current_user_type,
-                        },
-                    )
                     await state.set_state(states.Flow.personal_data_agreement)
 
                     await self._bot.edit_message_media(
@@ -158,95 +133,172 @@ class CallbacksRouter(aiogram.Router):
                         text=self._strings.menu.input_full_name(),
                     )
                 case [
+                    self._strings.callback.block,
+                    block_index,
+                ] if current_state == states.Flow.career_guidance_test:
+                    current_block_index = int(block_index)
+
+                    current_block = self._guidance.test.blocks[current_block_index]
+
+                    match current_block.type:
+                        case models.GuidanceBlockType.OPTIONS:
+                            current_question: models.GuidanceOptionsQuestion = current_block.questions[0]
+
+                            await self._bot.edit_message_text(
+                                chat_id=call.message.chat.id,
+                                message_id=call.message.message_id,
+                                text=self._strings.menu.options_question(
+                                    question=current_question,
+                                ),
+                                reply_markup=self._keyboards.question_options_answers(
+                                    block_index=current_block_index,
+                                    question_index=0,
+                                    answers=current_question.answers,
+                                ),
+                            )
+                        case models.GuidanceBlockType.BINARY:
+                            current_question: models.GuidanceBinaryQuestion = current_block.questions[0]
+
+                            await self._bot.edit_message_text(
+                                chat_id=call.message.chat.id,
+                                message_id=call.message.message_id,
+                                text=self._strings.menu.binary_question(
+                                    question=current_question,
+                                ),
+                                reply_markup=self._keyboards.question_binary_answers(
+                                    block_index=current_block_index,
+                                    question_index=0,
+                                ),
+                            )
+                case [
                     self._strings.callback.answer,
+                    block_index,
                     question_index,
                     answer_index,
                 ] if current_state == states.Flow.career_guidance_test:
+                    current_block_index = int(block_index)
                     current_question_index = int(question_index)
                     current_answer_index = int(answer_index)
 
-                    current_question = self._guidance.test.questions[current_question_index]
-                    current_answer = current_question.answers[current_answer_index]
-
-                    current_profession_rating: dict = await state.get_value(
-                        key=self._strings.state.professions_rating,
+                    current_types_rating: dict = await state.get_value(
+                        key=self._strings.state.types_rating,
                         default={},
                     )
-                    current_profession_id_rating = current_profession_rating.get(current_answer.profession_id, 0)
-                    current_profession_rating.update(
-                        {
-                            current_answer.profession_id: current_profession_id_rating + 1,
-                        }
-                    )
+
+                    current_block = self._guidance.test.blocks[current_block_index]
+
+                    match current_block.type:
+                        case models.GuidanceBlockType.OPTIONS:
+                            current_question: models.GuidanceOptionsQuestion = current_block.questions[
+                                current_question_index
+                            ]
+                            current_answer = current_question.answers[current_answer_index]
+
+                            current_type_rating = current_types_rating.get(current_answer.type_id, 0)
+                            current_types_rating.update(
+                                {
+                                    current_answer.type_id: current_type_rating + 1,
+                                }
+                            )
+                        case models.GuidanceBlockType.BINARY:
+                            current_question: models.GuidanceBinaryQuestion = current_block.questions[
+                                current_question_index
+                            ]
+                            current_answer = bool(current_answer_index)
+
+                            current_type_rating = current_types_rating.get(current_question.type_id, 0)
+                            current_types_rating.update(
+                                {
+                                    current_question.type_id: current_type_rating + int(current_answer),
+                                }
+                            )
 
                     await state.update_data(
                         data={
-                            self._strings.state.professions_rating: current_profession_rating,
+                            self._strings.state.types_rating: current_types_rating,
                         },
                     )
 
                     current_question_index += 1
 
-                    if current_question_index < len(self._guidance.test.questions):
-                        current_question = self._guidance.test.questions[current_question_index]
+                    if current_question_index < len(current_block.questions):
+                        match current_block.type:
+                            case models.GuidanceBlockType.OPTIONS:
+                                current_question: models.GuidanceOptionsQuestion = current_block.questions[
+                                    current_question_index
+                                ]
+
+                                await self._bot.edit_message_text(
+                                    chat_id=call.message.chat.id,
+                                    message_id=call.message.message_id,
+                                    text=self._strings.menu.options_question(
+                                        question=current_question,
+                                    ),
+                                    reply_markup=self._keyboards.question_options_answers(
+                                        block_index=current_block_index,
+                                        question_index=current_question_index,
+                                        answers=current_question.answers,
+                                    ),
+                                )
+                            case models.GuidanceBlockType.BINARY:
+                                current_question: models.GuidanceBinaryQuestion = current_block.questions[
+                                    current_question_index
+                                ]
+
+                                await self._bot.edit_message_text(
+                                    chat_id=call.message.chat.id,
+                                    message_id=call.message.message_id,
+                                    text=self._strings.menu.binary_question(
+                                        question=current_question,
+                                    ),
+                                    reply_markup=self._keyboards.question_binary_answers(
+                                        block_index=current_block_index,
+                                        question_index=current_question_index,
+                                    ),
+                                )
+                        return
+
+                    current_block_index += 1
+
+                    if current_block_index < len(self._guidance.test.blocks):
+                        current_block = self._guidance.test.blocks[current_block_index]
 
                         await self._bot.edit_message_text(
                             chat_id=call.message.chat.id,
                             message_id=call.message.message_id,
-                            text=current_question.text,
-                            reply_markup=self._keyboards.question_answers(
-                                question_index=current_question_index,
-                                answers=current_question.answers,
+                            text=self._strings.menu.block(current_block),
+                            reply_markup=self._keyboards.block(
+                                block_index=current_block_index,
                             ),
                         )
-                    else:
-                        current_recommended_course = self._guidance.get_recommended_course(
-                            professions_rating=current_profession_rating,
-                        )
-                        current_timestamp = int(datetime.datetime.now().timestamp())
+                        return
 
-                        current_user_type: models.UserType = await state.get_value(
-                            key=self._strings.state.current_user_type,
-                            default=models.UserType.SCHOOLKID,
-                        )
-                        current_full_name: str = await state.get_value(
-                            key=self._strings.state.current_full_name,
-                            default="",
-                        )
-                        current_phone_number: str | None = await state.get_value(
-                            key=self._strings.state.current_phone_number,
-                        )
-                        current_email: str | None = await state.get_value(
-                            key=self._strings.state.current_email,
-                        )
-                        current_institution: str = await state.get_value(
-                            key=self._strings.state.current_institution,
-                            default="",
-                        )
-                        current_course: str | None = await state.get_value(
-                            key=self._strings.state.current_course,
-                        )
+                    await state.set_state(states.Flow.select_user_type)
 
-                        await state.clear()
+                    await self._bot.edit_message_text(
+                        chat_id=call.message.chat.id,
+                        message_id=call.message.message_id,
+                        text=self._strings.menu.user_type(),
+                        reply_markup=self._keyboards.user_type(),
+                    )
+                case [
+                    self._strings.callback.user_type,
+                    user_type,
+                ] if current_state == states.Flow.select_user_type:
+                    current_user_type = models.UserType(int(user_type))
 
-                        self._database.users.add_user(
-                            _type=current_user_type,
-                            full_name=current_full_name,
-                            phone_number=current_phone_number,
-                            email=current_email,
-                            institution=current_institution,
-                            current_course=current_course,
-                            recommended_course=current_recommended_course.text,
-                            timestamp=current_timestamp,
-                        )
+                    await state.update_data(
+                        data={
+                            self._strings.state.current_user_type: current_user_type,
+                        },
+                    )
+                    await state.set_state(states.Flow.input_institution)
 
-                        await self._bot.edit_message_text(
-                            chat_id=call.message.chat.id,
-                            message_id=call.message.message_id,
-                            text=self._strings.menu.recommended_course(
-                                recommended_course=current_recommended_course,
-                            ),
-                        )
+                    await self._bot.edit_message_text(
+                        chat_id=call.message.chat.id,
+                        message_id=call.message.message_id,
+                        text=self._strings.menu.input_institution(),
+                    )
                 case _:
                     await self._bot.answer_callback_query(
                         callback_query_id=call.id,

@@ -47,7 +47,6 @@ async def main() -> None:
     )
 
     aiogram_callbacks_router = telegram_bot_callbacks.CallbacksRouter(
-        database_manager=database_manager,
         guidance_provider=guidance_provider,
         keyboards_provider=telegram_keyboards_provider,
         strings_provider=strings_provider,
@@ -64,6 +63,7 @@ async def main() -> None:
     )
     aiogram_messages_router = telegram_bot_messages.MessagesRouter(
         config_manager=config_manager,
+        database_manager=database_manager,
         guidance_provider=guidance_provider,
         keyboards_provider=telegram_keyboards_provider,
         strings_provider=strings_provider,

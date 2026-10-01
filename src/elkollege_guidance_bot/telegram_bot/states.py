@@ -6,6 +6,7 @@ class Flow(aiogram.fsm.state.StatesGroup):
     input_full_name = aiogram.fsm.state.State()
     input_phone_number = aiogram.fsm.state.State()
     input_email = aiogram.fsm.state.State()
+    career_guidance_test = aiogram.fsm.state.State()
+    select_user_type = aiogram.fsm.state.State()
     input_institution = aiogram.fsm.state.State()
     input_current_course = aiogram.fsm.state.State()
-    career_guidance_test = aiogram.fsm.state.State()

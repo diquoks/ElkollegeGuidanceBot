@@ -1,8 +1,7 @@
 import enum
+import typing
 
 import pydantic
-
-import pyquoks.utils
 
 
 class UserType(enum.IntEnum):
@@ -29,42 +28,63 @@ class DatabaseUser(pydantic.BaseModel):
     email: str | None
     institution: str
     current_course: str | None
-    recommended_course: str
+    possible_type: str
     timestamp: int
 
 
-class CareerGuidanceTest(pydantic.BaseModel):
-    professions: list[CareerGuidanceProfession]
-    questions: list[CareerGuidanceQuestion]
+class GuidanceTest(pydantic.BaseModel):
+    types: list[GuidanceType]
+    blocks: list[
+        typing.Annotated[
+            typing.Union[GuidanceOptionsBlock, GuidanceBinaryBlock],
+            pydantic.Field(discriminator="type"),
+        ],
+    ]
 
 
-class CareerGuidanceProfession(pydantic.BaseModel):
+class GuidanceType(pydantic.BaseModel):
     id: int
-    code: str
     name: str
+    class_: typing.Annotated[
+        str,
+        pydantic.Field(alias="class"),
+    ]
+    professions: list[str]
 
-    @property
-    def text(self) -> str:
-        return f"{self.code} {self.name}"
+
+class GuidanceBlockType(enum.IntEnum):
+    OPTIONS = 1
+    BINARY = 2
 
 
-class CareerGuidanceQuestion(pydantic.BaseModel):
+class GuidanceBlock(pydantic.BaseModel):
+    id: int
+    title: str
+    type: typing.Literal[GuidanceBlockType.OPTIONS, GuidanceBlockType.BINARY]
+    hint: str
+    questions: list[typing.Any]
+
+
+class GuidanceOptionsBlock(GuidanceBlock):
+    type: typing.Literal[GuidanceBlockType.OPTIONS] = GuidanceBlockType.OPTIONS
+    questions: list[GuidanceOptionsQuestion]
+
+
+class GuidanceOptionsQuestion(pydantic.BaseModel):
     question: str
-    answers: list[CareerGuidanceAnswer]
-
-    @property
-    def text(self) -> str:
-        return pyquoks.utils.format_multiline_string(
-            """
-            <b>{0}</b>
-            
-            {1}
-            """,
-            self.question,
-            "\n".join(f"{index}. {answer.text}" for index, answer in enumerate(self.answers, start=1))
-        )
+    answers: list[GuidanceOptionsAnswer]
 
 
-class CareerGuidanceAnswer(pydantic.BaseModel):
-    text: str
-    profession_id: int
+class GuidanceOptionsAnswer(pydantic.BaseModel):
+    answer: str
+    type_id: int
+
+
+class GuidanceBinaryBlock(GuidanceBlock):
+    type: typing.Literal[GuidanceBlockType.BINARY] = GuidanceBlockType.BINARY
+    questions: list[GuidanceBinaryQuestion]
+
+
+class GuidanceBinaryQuestion(pydantic.BaseModel):
+    question: str
+    type_id: int

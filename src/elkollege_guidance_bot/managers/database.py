@@ -10,61 +10,53 @@ class DatabaseManager(pyquoks.managers.database.DatabaseManager):
 class UsersDatabase(pyquoks.managers.database.Database):
     _NAME = "users"
 
-    _SQL = pyquoks.utils.format_multiline_string(
-        """
-        CREATE TABLE IF NOT EXISTS {0} (
-        id INTEGER PRIMARY KEY NOT NULL,
-        type INTEGER NOT NULL,
-        full_name TEXT NOT NULL,
-        phone_number TEXT,
-        email TEXT,
-        institution TEXT NOT NULL,
-        current_course TEXT,
-        recommended_course TEXT NOT NULL,
-        timestamp INT NOT NULL
-        )
-        """,
-        _NAME,
-    )
+    _SQL = f"""\
+CREATE TABLE IF NOT EXISTS {_NAME} (
+id INTEGER PRIMARY KEY NOT NULL,
+type INTEGER NOT NULL,
+full_name TEXT NOT NULL,
+phone_number TEXT,
+email TEXT,
+institution TEXT NOT NULL,
+current_course TEXT,
+possible_type TEXT NOT NULL,
+timestamp INT NOT NULL
+)"""
 
     def add_user(
             self,
-            _type: models.UserType,
+            type_: models.UserType,
             full_name: str,
             phone_number: str | None,
             email: str | None,
             institution: str,
             current_course: str | None,
-            recommended_course: str,
+            possible_type: str,
             timestamp: int,
     ) -> None:
         cursor = self.cursor()
 
         cursor.execute(
-            pyquoks.utils.format_multiline_string(
-                """
-                INSERT OR IGNORE INTO {0} (
-                type,
-                full_name,
-                phone_number,
-                email,
-                institution,
-                current_course,
-                recommended_course,
-                timestamp
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                self._NAME,
-            ),
+            f"""\
+INSERT OR IGNORE INTO {self._NAME} (
+type,
+full_name,
+phone_number,
+email,
+institution,
+current_course,
+possible_type,
+timestamp
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                _type,
+                type_,
                 full_name,
                 phone_number,
                 email,
                 institution,
                 current_course,
-                recommended_course,
+                possible_type,
                 timestamp,
             ),
         )
@@ -74,14 +66,7 @@ class UsersDatabase(pyquoks.managers.database.Database):
     def get_users_list(self) -> list[models.DatabaseUser]:
         cursor = self.cursor()
 
-        cursor.execute(
-            pyquoks.utils.format_multiline_string(
-                """
-                SELECT * FROM {0}
-                """,
-                self._NAME,
-            ),
-        )
+        cursor.execute(f"SELECT * FROM {self._NAME}")
         results = cursor.fetchall()
 
         return [models.DatabaseUser.model_validate(dict(result)) for result in results]

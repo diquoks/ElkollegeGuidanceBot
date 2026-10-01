@@ -1,5 +1,3 @@
-import pyquoks.utils
-
 from .. import models
 
 
@@ -22,47 +20,29 @@ class AlertStrings:
 
     @classmethod
     def button_unavailable(cls) -> str:
-        return "Данное тестирование недоступно, начните новое!"
+        return "Данное тестирование недоступно, начни новое!"
 
 
 class ButtonStrings:
 
-    # region /start
+    @classmethod
+    def start(cls) -> str:
+        return "Начать тестирование"
 
     @classmethod
-    def start_new_test(cls) -> str:
-        return "Начать новое тестирование"
-
-    @classmethod
-    def schoolkid(cls) -> str:
-        return models.UserType.SCHOOLKID.readable_name
-
-    @classmethod
-    def college_student(cls) -> str:
-        return models.UserType.COLLEGE_STUDENT.readable_name
-
-    @classmethod
-    def university_student(cls) -> str:
-        return models.UserType.UNIVERSITY_STUDENT.readable_name
-
-    @classmethod
-    def agree(cls) -> str:
+    def yes(cls) -> str:
         return "Да"
 
     @classmethod
-    def disagree(cls) -> str:
+    def no(cls) -> str:
         return "Нет"
 
     @classmethod
-    def answer(cls, answer_index: int) -> str:
-        return f"{answer_index + 1}"
-
-    # endregion
+    def continue_(cls) -> str:
+        return "Продолжить"
 
 
 class CallbackStrings:
-
-    # region /start
 
     @property
     def start(self) -> str:
@@ -77,10 +57,12 @@ class CallbackStrings:
         return "personal_data_agreement"
 
     @property
+    def block(self) -> str:
+        return "block"
+
+    @property
     def answer(self) -> str:
         return "answer"
-
-    # endregion
 
 
 class MenuStrings:
@@ -89,23 +71,24 @@ class MenuStrings:
 
     @classmethod
     def start(cls, bot_name: str) -> str:
-        return pyquoks.utils.format_multiline_string(
-            """
-            <b>Добро пожаловать в {0}!</b>
-            Здесь вы можете пройти профориентационное тестирование и узнать, какое направление вам подойдёт!
-            
-            Выберите свой текущий статус:
-            """,
-            bot_name,
-        )
+        return f"""\
+<b>Добро пожаловать в {bot_name}!</b>
+
+Здесь ты сможешь пройти профориентационное тестирование и узнать, какие профессии подходят тебе больше всего.
+
+В опросе нет правильных или неправильных ответов, выбирай тот вариант, который больше всего похож на тебя."""
 
     @classmethod
     def start_has_active_test(cls) -> str:
-        return "У вас уже есть активное тестирование, хотите начать новое?"
+        return "У тебя уже есть активное тестирование, хочешь начать новое?"
 
     @classmethod
     def personal_data_agreement(cls) -> str:
-        return "Продолжая, вы соглашаетесь с политикой обработки персональных данных."
+        return """\
+Тестирование не является диагностическим инструментом и не даёт окончательного ответа.
+Его цель — запустить размышление и помочь увидеть свои склонности.
+
+Продолжая, ты соглашаешься с политикой обработки персональных данных."""
 
     @classmethod
     def personal_data_agreement_disagree(cls) -> str:
@@ -113,62 +96,70 @@ class MenuStrings:
 
     @classmethod
     def input_full_name(cls) -> str:
-        return "Введите своё полное ФИО:"
+        return "Введи своё полное ФИО:"
 
     @classmethod
     def input_phone_number(cls) -> str:
-        return "Введите свой телефонный номер:"
+        return "Введи свой телефонный номер:"
 
     @classmethod
     def input_phone_number_error(cls) -> str:
-        return pyquoks.utils.format_multiline_string(
-            """
-            <b>Некорректный формат!</b>
-            Попробуйте ввести телефонный номер в следующем формате:
-            <pre>+7(987)654-32-10</pre>
-            
-            {0}
-            """,
-            cls.input_phone_number()
-        )
+        return f"""\
+<b>Некорректный формат!</b>
+Попробуй ввести телефонный номер в следующем формате:
+<pre>+7(987)654-32-10</pre>
+
+{cls.input_phone_number()}"""
 
     @classmethod
     def input_email(cls) -> str:
-        return "Введите свой адрес электронной почты:"
+        return "Введи свой адрес электронной почты:"
 
     @classmethod
     def input_email_error(cls) -> str:
-        return pyquoks.utils.format_multiline_string(
-            """
-            <b>Некорректный формат!</b>
-            Попробуйте ввести адрес электронной почты в следующем формате:
-            <pre>email@example.com</pre>
-            
-            {0}
-            """,
-            cls.input_email()
-        )
+        return f"""\
+<b>Некорректный формат!</b>
+Попробуй ввести адрес электронной почты в следующем формате:
+<pre>email@example.com</pre>
+
+{cls.input_email()}"""
+
+    @classmethod
+    def block(cls, block: models.GuidanceBlock) -> str:
+        return f"""\
+<b>Блок {block.id} | {block.title}</b>
+{block.hint}"""
+
+    @classmethod
+    def options_question(cls, question: models.GuidanceOptionsQuestion) -> str:
+        return f"""\
+<b>{question.question}</b>
+
+{"\n".join(f"{index}. {answer.answer}" for index, answer in enumerate(question.answers, start=1))}"""
+
+    @classmethod
+    def binary_question(cls, question: models.GuidanceBinaryQuestion) -> str:
+        return f"<b>{question.question}</b>"
+
+    @classmethod
+    def user_type(cls) -> str:
+        return "Выбери свой текущий статус:"
 
     @classmethod
     def input_institution(cls) -> str:
-        return "Введите название своего текущего учебного заведения:"
+        return "Введи название своего текущего учебного заведения:"
 
     @classmethod
     def input_current_course(cls) -> str:
-        return "Введите направление на котором сейчас обучаетесь:"
+        return "Введи направление на котором сейчас обучаешься:"
 
     @classmethod
-    def recommended_course(cls, recommended_course: models.CareerGuidanceProfession) -> str:
-        return pyquoks.utils.format_multiline_string(
-            """
-            <b>Тестирование окончено!</b>
-            Ваше рекомендованное направление:
-            {0}
-            
-            Если вы хотите получить консультацию по рекомендованному направлению, то вы можете оставить заявку по кнопке ниже.
-            """,
-            recommended_course.text,
-        )
+    def possible_type(cls, possible_type: models.GuidanceType) -> str:
+        return f"""\
+<b>Тестирование окончено!</b>
+Твой тип: {possible_type.name} ({possible_type.class_} тип)
+
+Подходящие профессии: {", ".join(possible_type.professions)}."""
 
     # endregion
 
@@ -215,10 +206,6 @@ class StateStrings:
         return "current_course"
 
     @property
-    def current_recommended_course(self) -> str:
-        return "current_recommended_course"
-
-    @property
     def input_phone_number_retries_count(self) -> str:
         return "input_phone_number_retries_count"
 
@@ -227,5 +214,5 @@ class StateStrings:
         return "input_email_retries_count"
 
     @property
-    def professions_rating(self) -> str:
-        return "professions_rating"
+    def types_rating(self) -> str:
+        return "types_rating"

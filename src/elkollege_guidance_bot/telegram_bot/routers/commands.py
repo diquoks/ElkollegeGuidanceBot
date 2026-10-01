@@ -101,7 +101,7 @@ class CommandsRouter(aiogram.Router):
             await self._bot.send_message(
                 chat_id=message.chat.id,
                 text=self._strings.menu.start_has_active_test(),
-                reply_markup=self._keyboards.start_has_active_test(),
+                reply_markup=self._keyboards.start(),
             )
             return
 
@@ -139,7 +139,7 @@ class CommandsRouter(aiogram.Router):
                     user.email,
                     user.institution,
                     user.current_course,
-                    user.recommended_course,
+                    user.possible_type,
                     datetime.datetime.fromtimestamp(user.timestamp),
                 ] for user in current_users_list
             ],
@@ -151,17 +151,19 @@ class CommandsRouter(aiogram.Router):
                 "Почта",
                 "Учебное заведение",
                 "Текущее направление",
-                "Рекомендованное направление",
-                "Время оставления заявки",
+                "Возможный тип",
+                "Время прохождения",
             ],
         )
 
         current_excel_file = io.BytesIO()
-        with pandas.ExcelWriter(current_excel_file, engine="openpyxl") as writer:
+        with pandas.ExcelWriter(current_excel_file, engine="xlsxwriter") as writer:
             current_users_data_frame.to_excel(
                 excel_writer=writer,
                 index=False,
             )
+
+            writer.sheets["Sheet1"].autofit()
         current_excel_file.seek(0)
 
         await self._bot.send_document(
@@ -187,13 +189,12 @@ class CommandsRouter(aiogram.Router):
             )
             return
 
-        with self._logger.stream as stream:
-            await self._bot.send_document(
-                chat_id=message.chat.id,
-                document=aiogram.types.BufferedInputFile(
-                    file=bytes(stream.getvalue(), encoding=self._logger.encoding),
-                    filename=self._logger.filename,
-                ),
-            )
+        await self._bot.send_document(
+            chat_id=message.chat.id,
+            document=aiogram.types.BufferedInputFile(
+                file=bytes(self._logger.read() or "", encoding=self._logger.encoding),
+                filename=self._logger.filename,
+            ),
+        )
 
     # endregion

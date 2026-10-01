@@ -1,5 +1,4 @@
 import datetime
-import io
 import logging
 import os
 import sys
@@ -23,6 +22,7 @@ class LoggerService(logging.Logger):
 
         self.filename = f"{int(datetime.datetime.now().timestamp())}.{name}.log"
         self.encoding = "utf-8"
+        self._path = os.path.join(path, self.filename)
 
         def new_formatter(fmt: str) -> logging.Formatter:
             return logging.Formatter(
@@ -35,10 +35,6 @@ class LoggerService(logging.Logger):
         self._stdout_handler.setFormatter(new_formatter("$levelname $asctime $name - $message"))
         self.addHandler(self._stdout_handler)
 
-        self._stream_handler = logging.StreamHandler(io.StringIO())
-        self._stream_handler.setFormatter(new_formatter("$levelname $asctime - $message"))
-        self.addHandler(self._stream_handler)
-
         if not file_handling:
             self._file_handler = None
             return
@@ -49,19 +45,18 @@ class LoggerService(logging.Logger):
         )
 
         self._file_handler = logging.FileHandler(
-            filename=os.path.join(path, self.filename),
+            filename=self._path,
             encoding=self.encoding,
         )
         self._file_handler.setFormatter(new_formatter("$levelname $asctime - $message"))
         self.addHandler(self._file_handler)
 
-    @property
-    def stream(self) -> io.StringIO:
-        """
-        :return: Stream-like object of current logs
-        """
+    def read(self) -> str | None:
+        if self._file_handler is None:
+            return None
 
-        return self._stream_handler.stream
+        with open(self._path, "r", encoding=self.encoding) as file:
+            return file.read()
 
     def log_exception(self, exception: Exception, raise_again: bool = False) -> None:
         """

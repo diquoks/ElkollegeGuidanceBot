@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 import aiogram
@@ -11,6 +12,7 @@ from ... import constants
 from ... import models
 from ... import utils
 from ...managers import config
+from ...managers import database
 from ...providers import guidance
 from ...providers import strings
 
@@ -19,6 +21,7 @@ class MessagesRouter(aiogram.Router):
     def __init__(
             self,
             config_manager: config.ConfigManager,
+            database_manager: database.DatabaseManager,
             guidance_provider: guidance.GuidanceProvider,
             keyboards_provider: keyboards.KeyboardsProvider,
             strings_provider: strings.StringsProvider,
@@ -26,6 +29,7 @@ class MessagesRouter(aiogram.Router):
             aiogram_bot: aiogram.Bot,
     ) -> None:
         self._config = config_manager
+        self._database = database_manager
         self._guidance = guidance_provider
         self._keyboards = keyboards_provider
         self._strings = strings_provider
@@ -131,56 +135,63 @@ class MessagesRouter(aiogram.Router):
                             self._strings.state.input_phone_number_retries_count: constants.DEFAULT_MATCH_RETRIES_COUNT,
                         },
                     )
-                else:
-                    await state.update_data(
-                        data={
-                            self._strings.state.current_phone_number: message.text,
-                        },
-                    )
+                    return
 
-                await state.set_state(states.Flow.input_email)
-
-                await self._bot.send_message(
-                    chat_id=message.chat.id,
-                    text=self._strings.menu.input_email(),
+                await state.update_data(
+                    data={
+                        self._strings.state.current_phone_number: message.text,
+                    },
                 )
-            case states.Flow.input_email:
-                if not utils.match_email(message.text):
-                    current_retries_count: int = await state.get_value(
-                        key=self._strings.state.input_email_retries_count,
-                        default=constants.DEFAULT_MATCH_RETRIES_COUNT,
-                    )
 
-                    if current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
-                        await state.update_data(
-                            data={
-                                self._strings.state.input_email_retries_count: current_retries_count + 1,
-                            },
-                        )
+                #     await state.set_state(states.Flow.input_email)
+                #
+                #     await self._bot.send_message(
+                #         chat_id=message.chat.id,
+                #         text=self._strings.menu.input_email(),
+                #     )
+                # case states.Flow.input_email:
+                #     if not utils.match_email(message.text):
+                #         current_retries_count: int = await state.get_value(
+                #             key=self._strings.state.input_email_retries_count,
+                #             default=constants.DEFAULT_MATCH_RETRIES_COUNT,
+                #         )
+                #
+                #         if current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
+                #             await state.update_data(
+                #                 data={
+                #                     self._strings.state.input_email_retries_count: current_retries_count + 1,
+                #                 },
+                #             )
+                #
+                #             await self._bot.send_message(
+                #                 chat_id=message.chat.id,
+                #                 text=self._strings.menu.input_email_error(),
+                #             )
+                #             return
+                #
+                #         await state.update_data(
+                #             data={
+                #                 self._strings.state.input_email_retries_count: constants.DEFAULT_MATCH_RETRIES_COUNT,
+                #             },
+                #         )
+                #         return
+                #
+                #     await state.update_data(
+                #         data={
+                #             self._strings.state.current_email: message.text,
+                #         },
+                #     )
 
-                        await self._bot.send_message(
-                            chat_id=message.chat.id,
-                            text=self._strings.menu.input_email_error(),
-                        )
-                        return
+                current_block = self._guidance.test.blocks[0]
 
-                    await state.update_data(
-                        data={
-                            self._strings.state.input_email_retries_count: constants.DEFAULT_MATCH_RETRIES_COUNT,
-                        },
-                    )
-                else:
-                    await state.update_data(
-                        data={
-                            self._strings.state.current_email: message.text,
-                        },
-                    )
-
-                await state.set_state(states.Flow.input_institution)
+                await state.set_state(states.Flow.career_guidance_test)
 
                 await self._bot.send_message(
                     chat_id=message.chat.id,
-                    text=self._strings.menu.input_institution(),
+                    text=self._strings.menu.block(current_block),
+                    reply_markup=self._keyboards.block(
+                        block_index=0,
+                    ),
                 )
             case states.Flow.input_institution:
                 current_user_type: models.UserType = await state.get_value(
@@ -195,17 +206,18 @@ class MessagesRouter(aiogram.Router):
                 )
 
                 if current_user_type == models.UserType.SCHOOLKID:
-                    await self._send_first_career_guidance_question(
+                    await self._send_possible_type(
                         message=message,
                         state=state,
                     )
-                else:
-                    await state.set_state(states.Flow.input_current_course)
+                    return
 
-                    await self._bot.send_message(
-                        chat_id=message.chat.id,
-                        text=self._strings.menu.input_current_course(),
-                    )
+                await state.set_state(states.Flow.input_current_course)
+
+                await self._bot.send_message(
+                    chat_id=message.chat.id,
+                    text=self._strings.menu.input_current_course(),
+                )
             case states.Flow.input_current_course:
                 await state.update_data(
                     data={
@@ -213,7 +225,7 @@ class MessagesRouter(aiogram.Router):
                     },
                 )
 
-                await self._send_first_career_guidance_question(
+                await self._send_possible_type(
                     message=message,
                     state=state,
                 )
@@ -222,24 +234,61 @@ class MessagesRouter(aiogram.Router):
 
     # region Helpers
 
-    async def _send_first_career_guidance_question(
+    async def _send_possible_type(
             self,
             message: aiogram.types.Message,
             state: aiogram.fsm.context.FSMContext,
     ) -> None:
-        current_question_index = constants.FIRST_CAREER_GUIDANCE_QUESTION_INDEX
+        current_types_rating: dict = await state.get_value(
+            key=self._strings.state.types_rating,
+            default={},
+        )
 
-        current_question = self._guidance.test.questions[current_question_index]
+        current_possible_type = self._guidance.get_possible_type(
+            types_rating=current_types_rating,
+        )
+        current_timestamp = int(datetime.datetime.now().timestamp())
 
-        await state.set_state(states.Flow.career_guidance_test)
+        current_user_type: models.UserType = await state.get_value(
+            key=self._strings.state.current_user_type,
+            default=models.UserType.SCHOOLKID,
+        )
+        current_full_name: str = await state.get_value(
+            key=self._strings.state.current_full_name,
+            default="",
+        )
+        current_phone_number: str | None = await state.get_value(
+            key=self._strings.state.current_phone_number,
+        )
+        current_email: str | None = await state.get_value(
+            key=self._strings.state.current_email,
+        )
+        current_institution: str = await state.get_value(
+            key=self._strings.state.current_institution,
+            default="",
+        )
+        current_course: str | None = await state.get_value(
+            key=self._strings.state.current_course,
+        )
+
+        await state.clear()
+
+        self._database.users.add_user(
+            type_=current_user_type,
+            full_name=current_full_name,
+            phone_number=current_phone_number,
+            email=current_email,
+            institution=current_institution,
+            current_course=current_course,
+            possible_type=current_possible_type.name,
+            timestamp=current_timestamp,
+        )
 
         await self._bot.send_message(
             chat_id=message.chat.id,
-            text=current_question.text,
-            reply_markup=self._keyboards.question_answers(
-                question_index=current_question_index,
-                answers=current_question.answers,
+            text=self._strings.menu.possible_type(
+                possible_type=current_possible_type,
             ),
         )
 
-# endregion
+    # endregion
