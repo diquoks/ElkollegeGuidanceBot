@@ -1,5 +1,7 @@
+using ElkollegeGuidanceBot.Helpers;
 using Telegram.BotAPI;
 using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
 using Telegram.BotAPI.Extensions;
 
 namespace ElkollegeGuidanceBot.Services;
@@ -37,7 +39,7 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
         if (botUser.Username is not null)
             SetBotUserName(botUser.Username);
 
-        // TODO: consider adding `Client.SetMyCommands` request
+        Client.SetMyCommands(BotCommands.AllCommands, new BotCommandScopeAllPrivateChats());
     }
 
     protected override Task OnExceptionAsync(Exception exp, CancellationToken cancellationToken = default)

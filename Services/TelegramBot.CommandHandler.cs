@@ -24,7 +24,7 @@ public partial class TelegramBot
 
         switch (commandName)
         {
-            case "start":
+            case BotCommands.StartCommand:
                 if (state.Type != StateType.Empty)
                 {
                     await Client.SendMessageAsync(
@@ -46,7 +46,7 @@ public partial class TelegramBot
                 );
 
                 break;
-            case "export":
+            case BotCommands.ExportCommand:
                 if (!isAdmin)
                     break;
 
