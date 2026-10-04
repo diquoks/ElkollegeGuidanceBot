@@ -3,6 +3,7 @@ using Telegram.BotAPI;
 using Telegram.BotAPI.AvailableMethods;
 using Telegram.BotAPI.AvailableTypes;
 using Telegram.BotAPI.Extensions;
+using Telegram.BotAPI.GettingUpdates;
 
 namespace ElkollegeGuidanceBot.Services;
 
@@ -42,16 +43,40 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
         Client.SetMyCommands(BotCommands.AllCommands, new BotCommandScopeAllPrivateChats());
     }
 
-    protected override Task OnExceptionAsync(Exception exp, CancellationToken cancellationToken = default)
+    public async Task OnUpdateAsync(
+        ITelegramBotClient _,
+        Update update,
+        CancellationToken cancellationToken = default
+    ) => await OnUpdateAsync(update, cancellationToken);
+
+    public Task OnErrorAsync(
+        ITelegramBotClient _,
+        Exception exp,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            _logger.LogError(exp, "An exception occurred while processing updates.");
-            return Task.CompletedTask;
+            switch (exp)
+            {
+                case OperationCanceledException when !cancellationToken.IsCancellationRequested:
+                    _logger.LogWarning(exp, "Request timed out.");
+                    return Task.CompletedTask;
+
+                case OperationCanceledException:
+                    throw exp;
+
+                default:
+                    _logger.LogError(exp, "An exception occurred.");
+                    return Task.CompletedTask;
+            }
         }
         catch (Exception e)
         {
             return Task.FromException(e);
         }
     }
+
+    protected override async Task OnExceptionAsync(Exception exp, CancellationToken cancellationToken = default) =>
+        await OnErrorAsync(Client, exp, cancellationToken: cancellationToken);
 }
