@@ -15,6 +15,9 @@ public partial class TelegramBot
         if (message.From?.Id == TelegramConstants.TelegramId)
             return;
 
+        if (string.IsNullOrEmpty(message.Text ?? message.Caption))
+            return;
+
         if (BotCommandParser.TryParse(message, out _))
         {
             await base.OnMessageAsync(message, cancellationToken);
