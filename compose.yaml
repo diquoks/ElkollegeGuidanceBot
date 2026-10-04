@@ -1,0 +1,7 @@
+﻿services:
+  elkollege_guidance_bot:
+    image: elkollege_guidance_bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+
