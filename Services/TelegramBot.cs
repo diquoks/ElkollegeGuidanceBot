@@ -13,6 +13,7 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
 
     public readonly ITelegramBotClient Client;
 
+    private readonly string _personalDataAgreementPath;
     private readonly long[] _admins;
     private readonly string _botName;
 
@@ -24,11 +25,14 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
         _databaseManager = databaseManager;
         _logger = logger;
 
+        const string personalDataAgreementKey = "Assets:PersonalDataAgreementPath";
+        var personalDataAgreementPath = configuration.GetValue<string>(personalDataAgreementKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(personalDataAgreementPath, personalDataAgreementKey);
+        _personalDataAgreementPath = personalDataAgreementPath;
+
         const string botTokenKey = "Telegram:BotToken";
         var botToken = configuration.GetValue<string>(botTokenKey);
-
-        if (string.IsNullOrWhiteSpace(botToken))
-            throw new InvalidOperationException($"{botTokenKey} cannot be empty!");
+        ArgumentException.ThrowIfNullOrWhiteSpace(botToken, botTokenKey);
 
         _admins = configuration.GetSection("Telegram:Admins").Get<long[]>() ?? [];
 

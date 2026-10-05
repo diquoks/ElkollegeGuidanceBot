@@ -5,6 +5,9 @@ public static class CallbackStrings
     public const string Start =
         "start";
 
+    public const string InstructionsRead =
+        "instructions_read";
+
     public const string PersonalDataAgreement =
         "personal_data_agreement";
 

@@ -28,10 +28,9 @@ public class DatabaseManager
             PRAGMA journal_mode = WAL;
 
             CREATE TABLE IF NOT EXISTS states (
-                user_id       INTEGER NOT NULL PRIMARY KEY,
-                last_callback TEXT NOT NULL,
-                type          INTEGER NOT NULL,
-                data          TEXT NOT NULL CHECK(json_valid(data))
+                user_id INTEGER NOT NULL PRIMARY KEY,
+                type    INTEGER NOT NULL,
+                data    TEXT NOT NULL CHECK(json_valid(data))
             );
 
             CREATE TABLE IF NOT EXISTS results (
@@ -58,8 +57,8 @@ public class DatabaseManager
         await using var command = connection.CreateCommand();
         command.CommandText =
             """
-            INSERT INTO states (user_id, last_callback, type, data)
-            VALUES ($user_id, $last_callback, $type, $data)
+            INSERT INTO states (user_id, type, data)
+            VALUES ($user_id, $type, $data)
             ON CONFLICT(user_id) DO UPDATE SET
                 type = excluded.type,
                 data = excluded.data
@@ -67,7 +66,6 @@ public class DatabaseManager
             """;
         command.Parameters.AddRange([
             new SqliteParameter("$user_id", state.UserId),
-            new SqliteParameter("$last_callback", state.LastCallback),
             new SqliteParameter("$type", JsonSerializer.Serialize(state.Type)),
             new SqliteParameter("$data", JsonSerializer.Serialize(state.Data))
         ]);
@@ -102,7 +100,6 @@ public class DatabaseManager
             yield return new State
             {
                 UserId = reader.GetInt64("user_id"),
-                LastCallback = reader.GetString("last_callback"),
                 Type = (StateType)reader.GetInt32("type"),
                 Data = JsonSerializer.Deserialize<Dictionary<string, object>>(reader.GetString("data")) ??
                        new Dictionary<string, object>()

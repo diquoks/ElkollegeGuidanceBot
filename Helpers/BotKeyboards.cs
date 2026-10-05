@@ -12,18 +12,23 @@ public static class BotKeyboards
                 .Append(BotButtons.StartTest)
         );
 
-    public static InlineKeyboardMarkup StartHasActiveTest(string lastCallback) =>
+    public static InlineKeyboardMarkup StartHasActiveTest =>
         new(
             new InlineKeyboardBuilder()
                 .Append(BotButtons.StartNewTest)
-                .Append(BotButtons.ResumePreviousTest(lastCallback))
         );
 
     public static InlineKeyboardMarkup PersonalDataAgreement =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.PersonalDataAgreementAgree)
-                .Append(BotButtons.PersonalDataAgreementDisagree)
+                .Append(BotButtons.PersonalDataAgreement(true))
+                .Append(BotButtons.PersonalDataAgreement(false))
+        );
+
+    public static InlineKeyboardMarkup Instructions =>
+        new(
+            new InlineKeyboardBuilder()
+                .Append(BotButtons.InstructionsRead)
         );
 
     // TODO: add other keyboards

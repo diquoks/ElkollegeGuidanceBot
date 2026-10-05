@@ -5,9 +5,6 @@ public static class ButtonStrings
     public static string StartTest =>
         "Начать тестирование";
 
-    public static string ResumePreviousTest =>
-        "Продолжить старое тестирование";
-
     public static string StartNewTest =>
         "Начать новое тестирование";
 

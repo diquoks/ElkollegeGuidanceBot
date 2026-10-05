@@ -17,20 +17,26 @@ public partial class TelegramBot
         CancellationToken cancellationToken = default
     )
     {
-        var isAdmin = _admins.Contains(message.From!.Id);
-        var state = await _databaseManager.GetUserStateAsync(message.From!.Id, cancellationToken);
+        if (
+            message.From is null ||
+            string.IsNullOrWhiteSpace(message.Text)
+        )
+            return;
 
-        _logger.LogBotInteraction(message.From!, $"/{commandName}", new { IsAdmin = isAdmin });
+        var isAdmin = _admins.Contains(message.From.Id);
+        var state = await _databaseManager.GetUserStateAsync(message.From.Id, cancellationToken);
+
+        _logger.LogBotInteraction(message.From!, message.Text, new { IsAdmin = isAdmin, State = state.Type });
 
         switch (commandName)
         {
             case BotCommands.StartCommand:
-                if (state.Type != StateType.Empty)
+                if (state.Type > StateType.Instructions)
                 {
                     await Client.SendMessageAsync(
-                        message.Chat.Id,
-                        MenuStrings.StartHasActiveTest,
-                        replyMarkup: BotKeyboards.StartHasActiveTest(state.LastCallback),
+                        chatId: message.Chat.Id,
+                        text: MenuStrings.StartHasActiveTest,
+                        replyMarkup: BotKeyboards.StartHasActiveTest,
                         cancellationToken: cancellationToken
                     );
 
@@ -38,8 +44,8 @@ public partial class TelegramBot
                 }
 
                 await Client.SendMessageAsync(
-                    message.Chat.Id,
-                    MenuStrings.Start(_botName),
+                    chatId: message.Chat.Id,
+                    text: MenuStrings.Start(_botName),
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Start,
                     cancellationToken: cancellationToken
@@ -64,8 +70,8 @@ public partial class TelegramBot
                     workbookStream.Position = 0;
 
                     await Client.SendDocumentAsync(
-                        message.Chat.Id,
-                        new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
+                        chatId: message.Chat.Id,
+                        document: new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
                         cancellationToken: cancellationToken
                     );
                 }

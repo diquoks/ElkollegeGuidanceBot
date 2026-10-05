@@ -2,13 +2,26 @@ namespace ElkollegeGuidanceBot.Models;
 
 public record State
 {
-    public required long UserId;
-    public string LastCallback { get; init; } = string.Empty;
-    public StateType Type { get; init; } = StateType.Empty;
+    public required long UserId { get; init; }
+    public StateType Type = StateType.Empty;
     public Dictionary<string, object> Data { get; init; } = new();
+
+    public void Clear()
+    {
+        Type = StateType.Empty;
+        Data.Clear();
+    }
 }
 
 public enum StateType
 {
-    Empty
+    Empty,
+    PersonalDataAgreement,
+    Instructions,
+    InputFullName,
+    InputPhoneNumber,
+    GuidanceTest,
+    SelectUserType,
+    InputInstitution,
+    InputCurrentCourse
 }

@@ -8,4 +8,5 @@ riderModule.iml
 appsettings.Development.json
 *.sln.DotSettings.user
 
+/Assets/
 Application.db*

@@ -13,29 +13,22 @@ public static class BotButtons
             CallbackData = CallbackStrings.Start
         };
 
-    public static InlineKeyboardButton ResumePreviousTest(string lastCallback) =>
-        new(ButtonStrings.ResumePreviousTest)
-        {
-            CallbackData = lastCallback
-        };
-
-
     public static InlineKeyboardButton StartNewTest =>
         new(ButtonStrings.StartNewTest)
         {
             CallbackData = CallbackStrings.Start
         };
 
-    public static InlineKeyboardButton PersonalDataAgreementAgree =>
-        new(ButtonStrings.Agree)
+    public static InlineKeyboardButton PersonalDataAgreement(bool isAgree) =>
+        new(isAgree ? ButtonStrings.Agree : ButtonStrings.Disagree)
         {
-            CallbackData = $"{CallbackStrings.PersonalDataAgreement} 1"
+            CallbackData = $"{CallbackStrings.PersonalDataAgreement} {Convert.ToString(isAgree)}"
         };
 
-    public static InlineKeyboardButton PersonalDataAgreementDisagree =>
-        new(ButtonStrings.Disagree)
+    public static InlineKeyboardButton InstructionsRead =>
+        new(ButtonStrings.Continue)
         {
-            CallbackData = $"{CallbackStrings.PersonalDataAgreement} 0"
+            CallbackData = CallbackStrings.InstructionsRead
         };
 
     // TODO: add other buttons

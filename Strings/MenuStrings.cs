@@ -19,7 +19,7 @@ public static class MenuStrings
         "Спасибо за уделённое время!";
 
     // TODO: consider moving to .yaml
-    public static string Instruction =>
+    public static string Instructions =>
         """
         Тестирование не является диагностическим инструментом и не даёт окончательного ответа.
         Его цель — запустить размышление и помочь увидеть свои склонности.
@@ -82,4 +82,11 @@ public static class MenuStrings
     //
     //     Подходящие профессии: {}.
     //     """;
+
+    #region Alerts
+
+    public static string TestUnavailable =>
+        "Данное тестирование недоступно, начни новое!";
+
+    #endregion
 }
