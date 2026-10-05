@@ -1,6 +1,9 @@
-﻿services:
-  elkollege_guidance_bot:
-    image: elkollege_guidance_bot
+﻿name: elkollege-guidance-bot
+
+services:
+  elkollege-guidance-bot:
+    container_name: ElkollegeGuidanceBot
+    image: elkollege-guidance-bot
     build:
       context: .
       dockerfile: Dockerfile
