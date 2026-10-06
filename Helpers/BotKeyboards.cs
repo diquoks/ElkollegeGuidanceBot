@@ -39,6 +39,6 @@ public static class BotKeyboards
                 .Append(BotButtons.SelectUserType(UserType.Schoolkid))
                 .AppendRow()
                 .Append(BotButtons.SelectUserType(UserType.CollegeStudent))
-                .Append(BotButtons.SelectUserType(UserType.CollegeStudent))
+                .Append(BotButtons.SelectUserType(UserType.UniversityStudent))
         );
 }
