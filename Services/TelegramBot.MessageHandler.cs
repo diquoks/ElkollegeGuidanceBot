@@ -40,8 +40,8 @@ public partial class TelegramBot
                 state.Data.FullName = message.Text;
 
                 await Client.SendMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: MenuStrings.InputPhoneNumber,
+                    message.Chat.Id,
+                    MenuStrings.InputPhoneNumber,
                     cancellationToken: cancellationToken
                 );
 
@@ -57,8 +57,8 @@ public partial class TelegramBot
                 else if (state.Data.PhoneNumberRetries < 3)
                 {
                     await Client.SendMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: MenuStrings.InputPhoneNumberError,
+                        message.Chat.Id,
+                        MenuStrings.InputPhoneNumberError,
                         parseMode: DefaultParseMode,
                         cancellationToken: cancellationToken
                     );

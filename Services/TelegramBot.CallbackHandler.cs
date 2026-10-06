@@ -45,14 +45,13 @@ public partial class TelegramBot
                     const string personalDataAgreementKey = "personal_data_agreement";
 
                     await Client.EditMessageMediaAsync<Message>(
-                        args: new EditMessageMediaArgs(
+                        new EditMessageMediaArgs(
                             new InputMediaDocument($"attach://{personalDataAgreementKey}")
                             {
                                 Caption = MenuStrings.PersonalDataAgreement
                             }
                         )
                         {
-                            BusinessConnectionId = null,
                             ChatId = callbackQuery.Message.Chat.Id,
                             MessageId = callbackQuery.Message.MessageId,
                             Files =
@@ -62,9 +61,9 @@ public partial class TelegramBot
                                     new InputFile(fileStream, Path.GetFileName(fileStream.Name))
                                 }
                             },
-                            ReplyMarkup = BotKeyboards.PersonalDataAgreement,
+                            ReplyMarkup = BotKeyboards.PersonalDataAgreement
                         },
-                        cancellationToken: cancellationToken
+                        cancellationToken
                     );
                 }
 
@@ -82,14 +81,14 @@ public partial class TelegramBot
                     state.Clear();
 
                     await Client.DeleteMessageAsync(
-                        chatId: callbackQuery.Message.Chat.Id,
-                        messageId: callbackQuery.Message.MessageId,
-                        cancellationToken: cancellationToken
+                        callbackQuery.Message.Chat.Id,
+                        callbackQuery.Message.MessageId,
+                        cancellationToken
                     );
 
                     await Client.SendMessageAsync(
-                        chatId: callbackQuery.Message.Chat.Id,
-                        text: MenuStrings.PersonalDataAgreementDisagree,
+                        callbackQuery.Message.Chat.Id,
+                        MenuStrings.PersonalDataAgreementDisagree,
                         cancellationToken: cancellationToken
                     );
 
@@ -99,14 +98,14 @@ public partial class TelegramBot
                 state.Type = StateType.Instructions;
 
                 await Client.EditMessageReplyMarkupAsync(
-                    chatId: callbackQuery.Message.Chat.Id,
-                    messageId: callbackQuery.Message.MessageId,
+                    callbackQuery.Message.Chat.Id,
+                    callbackQuery.Message.MessageId,
                     cancellationToken: cancellationToken
                 );
 
                 await Client.SendMessageAsync(
-                    chatId: callbackQuery.Message.Chat.Id,
-                    text: MenuStrings.Instructions,
+                    callbackQuery.Message.Chat.Id,
+                    MenuStrings.Instructions,
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Instructions,
                     cancellationToken: cancellationToken
@@ -121,14 +120,14 @@ public partial class TelegramBot
                 state.Type = StateType.InputFullName;
 
                 await Client.EditMessageReplyMarkupAsync(
-                    chatId: callbackQuery.Message.Chat.Id,
-                    messageId: callbackQuery.Message.MessageId,
+                    callbackQuery.Message.Chat.Id,
+                    callbackQuery.Message.MessageId,
                     cancellationToken: cancellationToken
                 );
 
                 await Client.SendMessageAsync(
-                    chatId: callbackQuery.Message.Chat.Id,
-                    text: MenuStrings.InputFullName,
+                    callbackQuery.Message.Chat.Id,
+                    MenuStrings.InputFullName,
                     cancellationToken: cancellationToken
                 );
 
@@ -136,9 +135,9 @@ public partial class TelegramBot
 
             default:
                 await Client.AnswerCallbackQueryAsync(
-                    callbackQueryId: callbackQuery.Id,
-                    text: MenuStrings.TestUnavailable,
-                    showAlert: true,
+                    callbackQuery.Id,
+                    MenuStrings.TestUnavailable,
+                    true,
                     cancellationToken: cancellationToken
                 );
 

@@ -34,8 +34,8 @@ public partial class TelegramBot
                 if (state.Type > StateType.Instructions)
                 {
                     await Client.SendMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: MenuStrings.StartHasActiveTest,
+                        message.Chat.Id,
+                        MenuStrings.StartHasActiveTest,
                         replyMarkup: BotKeyboards.StartHasActiveTest,
                         cancellationToken: cancellationToken
                     );
@@ -44,8 +44,8 @@ public partial class TelegramBot
                 }
 
                 await Client.SendMessageAsync(
-                    chatId: message.Chat.Id,
-                    text: MenuStrings.Start(_botName),
+                    message.Chat.Id,
+                    MenuStrings.Start(_botName),
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Start,
                     cancellationToken: cancellationToken
@@ -70,8 +70,8 @@ public partial class TelegramBot
                     workbookStream.Position = 0;
 
                     await Client.SendDocumentAsync(
-                        chatId: message.Chat.Id,
-                        document: new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
+                        message.Chat.Id,
+                        new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
                         cancellationToken: cancellationToken
                     );
                 }
@@ -91,7 +91,7 @@ public partial class TelegramBot
                         PossibleType = string.Empty,
                         Timestamp = DateTimeOffset.Now
                     },
-                    cancellationToken: cancellationToken
+                    cancellationToken
                 );
 
                 break;

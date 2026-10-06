@@ -81,6 +81,8 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
         }
     }
 
-    protected override async Task OnExceptionAsync(Exception exp, CancellationToken cancellationToken = default) =>
-        await OnErrorAsync(Client, exp, cancellationToken: cancellationToken);
+    protected override async Task OnExceptionAsync(
+        Exception exp,
+        CancellationToken cancellationToken = default
+    ) => await OnErrorAsync(Client, exp, cancellationToken: cancellationToken);
 }

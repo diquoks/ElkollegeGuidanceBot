@@ -11,10 +11,10 @@ public class Worker(ILogger<Worker> logger, TelegramBot bot) : BackgroundService
             logger.LogInformation("Worker started.");
 
         await bot.Client.StartLongPolling(
-            updateHandler: bot.OnUpdateAsync,
-            errorHandler: bot.OnErrorAsync,
-            options: new LongPollingOptions { DropPendingUpdates = true, Timeout = 10 },
-            cancellationToken: stoppingToken
+            bot.OnUpdateAsync,
+            bot.OnErrorAsync,
+            new LongPollingOptions { DropPendingUpdates = true, Timeout = 10 },
+            stoppingToken
         );
     }
 

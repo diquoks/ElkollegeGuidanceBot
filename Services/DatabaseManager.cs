@@ -50,7 +50,6 @@ public class DatabaseManager
 
         return await connection.QuerySingleAsync<State>(
             new CommandDefinition(
-                commandText:
                 """
                 INSERT INTO states (UserId, Type, DataJson)
                 VALUES (@UserId, @Type, @DataJson)
@@ -59,7 +58,7 @@ public class DatabaseManager
                     DataJson = excluded.DataJson
                 RETURNING *;
                 """,
-                parameters: state,
+                state,
                 cancellationToken: cancellationToken
             )
         );
@@ -71,9 +70,8 @@ public class DatabaseManager
 
         var state = await connection.QuerySingleOrDefaultAsync<State>(
             new CommandDefinition(
-                commandText:
                 "SELECT * FROM states WHERE UserId = @UserId",
-                parameters: new { UserId = userId },
+                new { UserId = userId },
                 cancellationToken: cancellationToken
             )
         );
@@ -87,7 +85,6 @@ public class DatabaseManager
 
         await connection.QueryAsync(
             new CommandDefinition(
-                commandText:
                 """
                 INSERT INTO results (
                     UserId,
@@ -110,7 +107,7 @@ public class DatabaseManager
                     @Created
                 );
                 """,
-                parameters: result,
+                result,
                 cancellationToken: cancellationToken
             )
         );
@@ -122,7 +119,6 @@ public class DatabaseManager
 
         await using var gridReader = await connection.QueryMultipleAsync(
             new CommandDefinition(
-                commandText:
                 "SELECT * FROM results",
                 cancellationToken: cancellationToken
             )
