@@ -111,37 +111,29 @@ class MessagesRouter(aiogram.Router):
                     text=self._strings.menu.input_phone_number(),
                 )
             case states.Flow.input_phone_number:
-                if not utils.match_phone_number(message.text):
-                    current_retries_count: int = await state.get_value(
-                        key=self._strings.state.input_phone_number_retries_count,
-                        default=constants.DEFAULT_MATCH_RETRIES_COUNT,
-                    )
+                current_retries_count: int = await state.get_value(
+                    key=self._strings.state.input_phone_number_retries_count,
+                    default=constants.DEFAULT_MATCH_RETRIES_COUNT,
+                )
 
-                    if current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
-                        await state.update_data(
-                            data={
-                                self._strings.state.input_phone_number_retries_count: current_retries_count + 1,
-                            },
-                        )
-
-                        await self._bot.send_message(
-                            chat_id=message.chat.id,
-                            text=self._strings.menu.input_phone_number_error(),
-                        )
-                        return
-
+                if utils.match_phone_number(message.text):
                     await state.update_data(
                         data={
-                            self._strings.state.input_phone_number_retries_count: constants.DEFAULT_MATCH_RETRIES_COUNT,
+                            self._strings.state.current_phone_number: message.text,
                         },
                     )
-                    return
+                elif current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
+                    await state.update_data(
+                        data={
+                            self._strings.state.input_phone_number_retries_count: current_retries_count + 1,
+                        },
+                    )
 
-                await state.update_data(
-                    data={
-                        self._strings.state.current_phone_number: message.text,
-                    },
-                )
+                    await self._bot.send_message(
+                        chat_id=message.chat.id,
+                        text=self._strings.menu.input_phone_number_error(),
+                    )
+                    return
 
                 #     await state.set_state(states.Flow.input_email)
                 #
@@ -150,37 +142,29 @@ class MessagesRouter(aiogram.Router):
                 #         text=self._strings.menu.input_email(),
                 #     )
                 # case states.Flow.input_email:
-                #     if not utils.match_email(message.text):
-                #         current_retries_count: int = await state.get_value(
-                #             key=self._strings.state.input_email_retries_count,
-                #             default=constants.DEFAULT_MATCH_RETRIES_COUNT,
-                #         )
+                #     current_retries_count: int = await state.get_value(
+                #         key=self._strings.state.input_email_retries_count,
+                #         default=constants.DEFAULT_MATCH_RETRIES_COUNT,
+                #     )
                 #
-                #         if current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
-                #             await state.update_data(
-                #                 data={
-                #                     self._strings.state.input_email_retries_count: current_retries_count + 1,
-                #                 },
-                #             )
-                #
-                #             await self._bot.send_message(
-                #                 chat_id=message.chat.id,
-                #                 text=self._strings.menu.input_email_error(),
-                #             )
-                #             return
-                #
+                #     if utils.match_email(message.text):
                 #         await state.update_data(
                 #             data={
-                #                 self._strings.state.input_email_retries_count: constants.DEFAULT_MATCH_RETRIES_COUNT,
+                #                 self._strings.state.current_email: message.text,
                 #             },
                 #         )
-                #         return
+                #     elif current_retries_count < constants.MAX_MATCH_RETRIES_COUNT:
+                #         await state.update_data(
+                #             data={
+                #                 self._strings.state.input_email_retries_count: current_retries_count + 1,
+                #             },
+                #         )
                 #
-                #     await state.update_data(
-                #         data={
-                #             self._strings.state.current_email: message.text,
-                #         },
-                #     )
+                #         await self._bot.send_message(
+                #             chat_id=message.chat.id,
+                #             text=self._strings.menu.input_email_error(),
+                #         )
+                #         return
 
                 current_block = self._guidance.test.blocks[0]
 
