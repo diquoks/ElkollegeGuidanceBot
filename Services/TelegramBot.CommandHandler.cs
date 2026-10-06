@@ -77,6 +77,24 @@ public partial class TelegramBot
                 }
 
                 break;
+
+            case BotCommands.DevSeedCommand:
+                await _databaseManager.InsertResultAsync(
+                    new Result
+                    {
+                        UserId = message.From.Id,
+                        FullName = state.Data.FullName ?? string.Empty,
+                        PhoneNumber = state.Data.PhoneNumber ?? string.Empty,
+                        UserType = state.Data.UserType ?? string.Empty,
+                        Institution = state.Data.Institution ?? string.Empty,
+                        CurrentCourse = state.Data.CurrentCourse ?? string.Empty,
+                        PossibleType = string.Empty,
+                        Timestamp = DateTimeOffset.Now
+                    },
+                    cancellationToken: cancellationToken
+                );
+
+                break;
         }
     }
 }

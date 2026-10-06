@@ -31,16 +31,14 @@ public static class MenuStrings
         "Введи своё полное ФИО:";
 
     public static string InputPhoneNumber =>
-        "Введи свой телефонный номер:";
+        "Введи свой телефонный номер (без пробелов):";
 
     public static string InputPhoneNumberError =>
-        $"""
-         <b>Некорректный формат!</b>
-         Попробуй ввести телефонный номер в следующем формате:
-         <pre>+7(987)654-32-10</pre>
-
-         {InputPhoneNumber}
-         """;
+        """
+        <b>Некорректный формат!</b>
+        Попробуй ввести телефонный номер в следующем формате:
+        <pre>+7(987)654-32-10</pre>
+        """;
 
     // TODO
     // public static string TestBlock() =>

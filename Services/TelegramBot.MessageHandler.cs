@@ -37,7 +37,7 @@ public partial class TelegramBot
         {
             case StateType.InputFullName:
                 state.Type = StateType.InputPhoneNumber;
-                state.Data[StateDataStrings.FullName] = message.Text;
+                state.Data.FullName = message.Text;
 
                 await Client.SendMessageAsync(
                     chatId: message.Chat.Id,
@@ -47,7 +47,32 @@ public partial class TelegramBot
 
                 break;
             case StateType.InputPhoneNumber:
-                throw new NotImplementedException();
+                if (
+                    message.Entities?.FirstOrDefault(entity => entity.Type == MessageEntityTypes.PhoneNumber) is
+                    { } phoneNumberEntity
+                )
+                {
+                    state.Data.PhoneNumber = message.Text.Substring(phoneNumberEntity.Offset, phoneNumberEntity.Length);
+                }
+                else if (state.Data.PhoneNumberRetries < 3)
+                {
+                    await Client.SendMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: MenuStrings.InputPhoneNumberError,
+                        parseMode: DefaultParseMode,
+                        cancellationToken: cancellationToken
+                    );
+
+                    state.Data.PhoneNumberRetries++;
+
+                    break;
+                }
+
+                state.Type = StateType.GuidanceTest;
+
+                // TODO: send first block
+
+                break;
         }
 
         await _databaseManager.UpsertStateAsync(state, cancellationToken);

@@ -14,6 +14,9 @@ public static class BotCommands
     private static BotCommand Export =>
         new(ExportCommand, "Экспортировать БД");
 
+    // TODO: remove
+    public const string DevSeedCommand = "seed";
+
     public static BotCommand[] AllCommands =>
     [
         Start,
