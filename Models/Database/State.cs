@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
-namespace ElkollegeGuidanceBot.Models;
+namespace ElkollegeGuidanceBot.Models.Database;
 
 public record State
 {

@@ -1,5 +1,6 @@
 using ElkollegeGuidanceBot.Extensions;
-using ElkollegeGuidanceBot.Models;
+using ElkollegeGuidanceBot.Helpers;
+using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Strings;
 using Telegram.BotAPI;
 using Telegram.BotAPI.AvailableMethods;
@@ -69,8 +70,15 @@ public partial class TelegramBot
                 }
 
                 state.Type = StateType.GuidanceTest;
+                // TODO: add block/question info to state
 
-                // TODO: send first block
+                await Client.SendMessageAsync(
+                    message.Chat.Id,
+                    MenuStrings.TestBlock(_guidanceProvider.Test.Blocks.First(), 1),
+                    parseMode: DefaultParseMode,
+                    replyMarkup: BotKeyboards.TestBlock(0),
+                    cancellationToken: cancellationToken
+                );
 
                 break;
         }

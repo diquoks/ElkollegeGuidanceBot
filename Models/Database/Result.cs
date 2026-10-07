@@ -2,7 +2,7 @@ using System.ComponentModel;
 using ClosedXML.Attributes;
 using JetBrains.Annotations;
 
-namespace ElkollegeGuidanceBot.Models;
+namespace ElkollegeGuidanceBot.Models.Database;
 
 public record Result
 {

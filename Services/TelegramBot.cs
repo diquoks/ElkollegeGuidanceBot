@@ -17,11 +17,18 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
     private readonly long[] _admins;
     private readonly string _botName;
 
+    private readonly GuidanceProvider _guidanceProvider;
     private readonly DatabaseManager _databaseManager;
     private readonly ILogger<TelegramBot> _logger;
 
-    public TelegramBot(DatabaseManager databaseManager, ILogger<TelegramBot> logger, IConfiguration configuration)
+    public TelegramBot(
+        GuidanceProvider guidanceProvider,
+        DatabaseManager databaseManager,
+        ILogger<TelegramBot> logger,
+        IConfiguration configuration
+    )
     {
+        _guidanceProvider = guidanceProvider;
         _databaseManager = databaseManager;
         _logger = logger;
 

@@ -1,3 +1,7 @@
+using ElkollegeGuidanceBot.Models.Guidance;
+using ElkollegeGuidanceBot.Models.Guidance.Binary;
+using ElkollegeGuidanceBot.Models.Guidance.Options;
+
 namespace ElkollegeGuidanceBot.Strings;
 
 public static class MenuStrings
@@ -18,15 +22,6 @@ public static class MenuStrings
     public static string PersonalDataAgreementDisagree =>
         "Спасибо за уделённое время!";
 
-    // TODO: consider moving to .yaml
-    public static string Instructions =>
-        """
-        Тестирование не является диагностическим инструментом и не даёт окончательного ответа.
-        Его цель — запустить размышление и помочь увидеть свои склонности.
-
-        <b>В опросе нет правильных или неправильных ответов, выбирай тот вариант, который больше всего похож на тебя.</b>
-        """;
-
     public static string InputFullName =>
         "Введи своё полное ФИО:";
 
@@ -40,28 +35,24 @@ public static class MenuStrings
         <pre>+7(987)654-32-10</pre>
         """;
 
-    // TODO
-    // public static string TestBlock() =>
-    //     """
-    //     <b>Блок {} | {} ({} вопросов)</b>
-    //     {}
-    //     """;
-    //
-    // public static string TestQuestionTitle() =>
-    //     "<b>Вопрос {} | {}</b>";
-    //
-    // public static string TestBinaryQuestion() =>
-    //     TestQuestionTitle();
-    //
-    // public static string TestOptionsAnswer() =>
-    //     "{}. {}";
-    //
-    // public static string TestOptionsQuestion() =>
-    //     """
-    //     {TestQuestionTitle}
-    //
-    //     {}
-    //     """;
+    public static string TestBlock(GuidanceBlock block, int blockNumber) =>
+        $"""
+         <b>Блок {blockNumber} | {block.Title}</b>
+         {block.Hint}
+         """;
+
+    private static string TestQuestionTitle(GuidanceBlockQuestion question, int questionNumber) =>
+        $"<b>Вопрос {questionNumber} | {question.Question}</b>";
+
+    public static string TestOptionsQuestion(GuidanceOptionsQuestion question, int questionNumber) =>
+        $"""
+         {TestQuestionTitle(question, questionNumber)}
+
+         {string.Join('\n', question.Answers.Select((answer, i) => $"{i + 1}. {answer.Answer}"))}
+         """;
+
+    public static string TestBinaryQuestion(GuidanceBinaryQuestion question, int questionNumber) =>
+        TestQuestionTitle(question, questionNumber);
 
     public static string SelectUserType =>
         "Выбери свой текущий статус:";
@@ -72,14 +63,13 @@ public static class MenuStrings
     public static string InputCurrentCourse =>
         "Введи направление, на котором сейчас обучаешься:";
 
-    // TODO
-    // public static string PossibleType() =>
-    //     """
-    //     <b>Тестирование окончено!</b>
-    //     Твой тип: {} ({}).
-    //
-    //     Подходящие профессии: {}.
-    //     """;
+    public static string PossibleType(GuidanceType type) =>
+        $"""
+         <b>Тестирование окончено!</b>
+         Твой тип: {type.Class} ({type.Name}).
+
+         Подходящие профессии: {string.Join(", ", type.Professions)}.
+         """;
 
     #region Alerts
 

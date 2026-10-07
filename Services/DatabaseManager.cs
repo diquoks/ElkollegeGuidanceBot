@@ -1,5 +1,5 @@
 using Dapper;
-using ElkollegeGuidanceBot.Models;
+using ElkollegeGuidanceBot.Models.Database;
 using Microsoft.Data.Sqlite;
 
 namespace ElkollegeGuidanceBot.Services;

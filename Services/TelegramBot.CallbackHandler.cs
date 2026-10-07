@@ -1,6 +1,6 @@
 using ElkollegeGuidanceBot.Extensions;
 using ElkollegeGuidanceBot.Helpers;
-using ElkollegeGuidanceBot.Models;
+using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Strings;
 using Telegram.BotAPI.AvailableMethods;
 using Telegram.BotAPI.AvailableTypes;
@@ -105,7 +105,7 @@ public partial class TelegramBot
 
                 await Client.SendMessageAsync(
                     callbackQuery.Message.Chat.Id,
-                    MenuStrings.Instructions,
+                    _guidanceProvider.Test.Instruction,
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Instructions,
                     cancellationToken: cancellationToken

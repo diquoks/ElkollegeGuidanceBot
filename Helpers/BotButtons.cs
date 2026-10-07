@@ -1,5 +1,5 @@
 using ElkollegeGuidanceBot.Extensions;
-using ElkollegeGuidanceBot.Models;
+using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Strings;
 using Telegram.BotAPI.AvailableTypes;
 
@@ -31,7 +31,23 @@ public static class BotButtons
             CallbackData = CallbackStrings.InstructionsRead
         };
 
-    // TODO: add other buttons
+    public static InlineKeyboardButton BlockContinue(int blockIndex) =>
+        new(ButtonStrings.Continue)
+        {
+            CallbackData = $"{CallbackStrings.TestBlock} {blockIndex}"
+        };
+
+    public static InlineKeyboardButton OptionsQuestionAnswer(int blockIndex, int questionIndex, int answerIndex) =>
+        new($"{questionIndex + 1}")
+        {
+            CallbackData = $"{CallbackStrings.TestAnswer} {blockIndex} {questionIndex} {answerIndex}"
+        };
+
+    public static InlineKeyboardButton BinaryQuestionAnswer(int blockIndex, int questionIndex, bool value) =>
+        new(value ? ButtonStrings.Yes : ButtonStrings.No)
+        {
+            CallbackData = $"{CallbackStrings.TestAnswer} {blockIndex} {questionIndex} {Convert.ToString(value)}"
+        };
 
     public static InlineKeyboardButton SelectUserType(UserType userType) =>
         new(userType.GetDescription())

@@ -8,8 +8,7 @@ internal static class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
         builder.Services
-            // TODO
-            // .AddSingleton<GuidanceTestProvider>()
+            .AddSingleton<GuidanceProvider>()
             .AddSingleton<DatabaseManager>()
             .AddSingleton<TelegramBot>()
             .AddHostedService<Worker>();

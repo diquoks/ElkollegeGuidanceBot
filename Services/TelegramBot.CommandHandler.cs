@@ -1,7 +1,7 @@
 using ClosedXML.Excel;
 using ElkollegeGuidanceBot.Extensions;
 using ElkollegeGuidanceBot.Helpers;
-using ElkollegeGuidanceBot.Models;
+using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Strings;
 using Telegram.BotAPI.AvailableMethods;
 using Telegram.BotAPI.AvailableTypes;
@@ -62,8 +62,25 @@ public partial class TelegramBot
                 using (var workbook = new XLWorkbook())
                 {
                     var worksheet = workbook.Worksheets.Add();
-                    worksheet.FirstCell().InsertTable(allResults);
-                    worksheet.Columns().AdjustToContents();
+
+                    var resultsTable = worksheet
+                        .FirstCell()
+                        .InsertTable(allResults);
+
+                    worksheet
+                        .Cell(
+                            resultsTable
+                                .FirstRow()
+                                .RowNumber(),
+                            resultsTable
+                                .LastColumn()
+                                .ColumnNumber() + 2
+                        )
+                        .InsertTable(_guidanceProvider.Test.Types);
+
+                    worksheet
+                        .Columns()
+                        .AdjustToContents();
 
                     await using var workbookStream = new MemoryStream();
                     workbook.SaveAs(workbookStream);
