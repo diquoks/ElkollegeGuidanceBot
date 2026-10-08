@@ -9,5 +9,5 @@ public record GuidanceTest
 
     public required GuidanceType[] Types { get; init; }
 
-    public required GuidanceBlock[] Blocks { get; init; }
+    public required IGuidanceBlock[] Blocks { get; init; }
 }

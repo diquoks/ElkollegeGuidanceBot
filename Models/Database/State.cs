@@ -41,6 +41,8 @@ public enum StateType
 
 public record StateData
 {
+    public string NextExpectedCallback { get; set; } = string.Empty;
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? FullName { get; set; }
 
@@ -50,7 +52,7 @@ public record StateData
     public int PhoneNumberRetries { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? UserType { get; set; }
+    public UserType? UserType { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Institution { get; set; }

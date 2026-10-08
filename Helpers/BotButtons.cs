@@ -22,7 +22,7 @@ public static class BotButtons
     public static InlineKeyboardButton PersonalDataAgreement(bool isAgree) =>
         new(isAgree ? ButtonStrings.Agree : ButtonStrings.Disagree)
         {
-            CallbackData = $"{CallbackStrings.PersonalDataAgreement} {Convert.ToString(isAgree)}"
+            CallbackData = CallbackStrings.PersonalDataAgreementCallback(isAgree)
         };
 
     public static InlineKeyboardButton InstructionsRead =>
@@ -34,24 +34,29 @@ public static class BotButtons
     public static InlineKeyboardButton BlockContinue(int blockIndex) =>
         new(ButtonStrings.Continue)
         {
-            CallbackData = $"{CallbackStrings.TestBlock} {blockIndex}"
+            CallbackData = CallbackStrings.TestBlockCallback(blockIndex)
         };
 
-    public static InlineKeyboardButton OptionsQuestionAnswer(int blockIndex, int questionIndex, int answerIndex) =>
-        new($"{questionIndex + 1}")
+    public static InlineKeyboardButton OptionsQuestionAnswer(
+        int blockIndex,
+        int questionIndex,
+        int answerIndex,
+        int answerNumber
+    ) =>
+        new($"{answerNumber}")
         {
-            CallbackData = $"{CallbackStrings.TestAnswer} {blockIndex} {questionIndex} {answerIndex}"
+            CallbackData = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex, answerIndex)
         };
 
     public static InlineKeyboardButton BinaryQuestionAnswer(int blockIndex, int questionIndex, bool value) =>
         new(value ? ButtonStrings.Yes : ButtonStrings.No)
         {
-            CallbackData = $"{CallbackStrings.TestAnswer} {blockIndex} {questionIndex} {Convert.ToString(value)}"
+            CallbackData = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex, value)
         };
 
     public static InlineKeyboardButton SelectUserType(UserType userType) =>
         new(userType.GetDescription())
         {
-            CallbackData = $"{CallbackStrings.SelectUserType} {(int)userType}"
+            CallbackData = CallbackStrings.SelectUserTypeCallback((int)userType)
         };
 }

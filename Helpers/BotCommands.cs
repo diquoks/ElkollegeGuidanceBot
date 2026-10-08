@@ -8,9 +8,6 @@ public static class BotCommands
 
     public const string ExportCommand = "export";
 
-    // TODO: remove
-    public const string DevSeedCommand = "seed";
-
     public static BotCommand[] AllCommands =>
     [
         new(StartCommand, "Пройти тестирование"),

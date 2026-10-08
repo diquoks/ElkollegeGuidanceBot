@@ -20,8 +20,8 @@ public class GuidanceProvider
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeDiscriminatingNodeDeserializer(options =>
                 {
-                    options.AddKeyValueTypeDiscriminator<GuidanceBlock>(
-                        nameof(GuidanceBlock.Type).ToLower(),
+                    options.AddKeyValueTypeDiscriminator<IGuidanceBlock>(
+                        nameof(IGuidanceBlock.Type).ToLower(),
                         new Dictionary<string, Type>
                         {
                             { nameof(GuidanceBlockType.Options), typeof(GuidanceOptionsBlock) },

@@ -37,17 +37,20 @@ public partial class TelegramBot
         switch (state.Type)
         {
             case StateType.InputFullName:
-                state.Type = StateType.InputPhoneNumber;
+            {
                 state.Data.FullName = message.Text;
+                state.Type = StateType.InputPhoneNumber;
 
                 await Client.SendMessageAsync(
-                    message.Chat.Id,
-                    MenuStrings.InputPhoneNumber,
+                    chatId: message.Chat.Id,
+                    text: MenuStrings.InputPhoneNumber,
                     cancellationToken: cancellationToken
                 );
 
                 break;
+            }
             case StateType.InputPhoneNumber:
+            {
                 if (
                     message.Entities?.FirstOrDefault(entity => entity.Type == MessageEntityTypes.PhoneNumber) is
                     { } phoneNumberEntity
@@ -58,8 +61,8 @@ public partial class TelegramBot
                 else if (state.Data.PhoneNumberRetries < 3)
                 {
                     await Client.SendMessageAsync(
-                        message.Chat.Id,
-                        MenuStrings.InputPhoneNumberError,
+                        chatId: message.Chat.Id,
+                        text: MenuStrings.InputPhoneNumberError,
                         parseMode: DefaultParseMode,
                         cancellationToken: cancellationToken
                     );
@@ -70,21 +73,46 @@ public partial class TelegramBot
                 }
 
                 state.Type = StateType.GuidanceTest;
-                // TODO: add block/question info to state
 
-                await Client.SendMessageAsync(
-                    message.Chat.Id,
-                    MenuStrings.TestBlock(_guidanceProvider.Test.Blocks.First(), 1),
-                    parseMode: DefaultParseMode,
-                    replyMarkup: BotKeyboards.TestBlock(0),
-                    cancellationToken: cancellationToken
+                const int firstBlockIndex = 0;
+
+                state = await ProceedToTestBlockAsync(
+                    message,
+                    state,
+                    firstBlockIndex,
+                    cancellationToken
                 );
 
                 break;
+            }
+            case StateType.InputInstitution:
+                throw new NotImplementedException();
         }
 
         await _databaseManager.UpsertStateAsync(state, cancellationToken);
 
         await base.OnMessageAsync(message, cancellationToken);
+    }
+
+    private async Task<State> ProceedToTestBlockAsync(
+        Message message,
+        State state,
+        int blockIndex,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var block = _guidanceProvider.Test.Blocks[blockIndex];
+
+        state.Data.NextExpectedCallback = CallbackStrings.TestBlockCallback(blockIndex);
+
+        await Client.SendMessageAsync(
+            chatId: message.Chat.Id,
+            text: MenuStrings.TestBlock(block),
+            parseMode: DefaultParseMode,
+            replyMarkup: BotKeyboards.TestBlock(blockIndex),
+            cancellationToken: cancellationToken
+        );
+
+        return state;
     }
 }

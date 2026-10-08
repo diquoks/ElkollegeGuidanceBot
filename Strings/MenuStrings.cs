@@ -35,24 +35,24 @@ public static class MenuStrings
         <pre>+7(987)654-32-10</pre>
         """;
 
-    public static string TestBlock(GuidanceBlock block, int blockNumber) =>
+    public static string TestBlock(IGuidanceBlock block) =>
         $"""
-         <b>Блок {blockNumber} | {block.Title}</b>
+         <b>{block.Title}</b>
          {block.Hint}
          """;
 
-    private static string TestQuestionTitle(GuidanceBlockQuestion question, int questionNumber) =>
-        $"<b>Вопрос {questionNumber} | {question.Question}</b>";
+    private static string TestQuestionTitle(GuidanceBlockQuestion question) =>
+        $"<b>{question.Question}</b>";
 
-    public static string TestOptionsQuestion(GuidanceOptionsQuestion question, int questionNumber) =>
+    public static string TestOptionsQuestion(GuidanceOptionsQuestion question) =>
         $"""
-         {TestQuestionTitle(question, questionNumber)}
+         {TestQuestionTitle(question)}
 
          {string.Join('\n', question.Answers.Select((answer, i) => $"{i + 1}. {answer.Answer}"))}
          """;
 
-    public static string TestBinaryQuestion(GuidanceBinaryQuestion question, int questionNumber) =>
-        TestQuestionTitle(question, questionNumber);
+    public static string TestBinaryQuestion(GuidanceBinaryQuestion question) =>
+        TestQuestionTitle(question);
 
     public static string SelectUserType =>
         "Выбери свой текущий статус:";

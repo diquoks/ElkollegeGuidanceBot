@@ -31,11 +31,12 @@ public partial class TelegramBot
         switch (commandName)
         {
             case BotCommands.StartCommand:
+            {
                 if (state.Type > StateType.Instructions)
                 {
                     await Client.SendMessageAsync(
-                        message.Chat.Id,
-                        MenuStrings.StartHasActiveTest,
+                        chatId: message.Chat.Id,
+                        text: MenuStrings.StartHasActiveTest,
                         replyMarkup: BotKeyboards.StartHasActiveTest,
                         cancellationToken: cancellationToken
                     );
@@ -44,74 +45,56 @@ public partial class TelegramBot
                 }
 
                 await Client.SendMessageAsync(
-                    message.Chat.Id,
-                    MenuStrings.Start(_botName),
+                    chatId: message.Chat.Id,
+                    text: MenuStrings.Start(_botName),
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Start,
                     cancellationToken: cancellationToken
                 );
 
                 break;
-
+            }
             case BotCommands.ExportCommand:
+            {
                 if (!isAdmin)
                     break;
 
                 var allResults = await _databaseManager.GetAllResultsAsync(cancellationToken);
 
-                using (var workbook = new XLWorkbook())
-                {
-                    var worksheet = workbook.Worksheets.Add();
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add();
 
-                    var resultsTable = worksheet
-                        .FirstCell()
-                        .InsertTable(allResults);
+                var resultsTable = worksheet
+                    .FirstCell()
+                    .InsertTable(allResults);
 
-                    worksheet
-                        .Cell(
-                            resultsTable
-                                .FirstRow()
-                                .RowNumber(),
-                            resultsTable
-                                .LastColumn()
-                                .ColumnNumber() + 2
-                        )
-                        .InsertTable(_guidanceProvider.Test.Types);
+                worksheet
+                    .Cell(
+                        resultsTable
+                            .FirstRow()
+                            .RowNumber(),
+                        resultsTable
+                            .LastColumn()
+                            .ColumnNumber() + 2
+                    )
+                    .InsertTable(_guidanceProvider.Test.Types);
 
-                    worksheet
-                        .Columns()
-                        .AdjustToContents();
+                worksheet
+                    .Columns()
+                    .AdjustToContents();
 
-                    await using var workbookStream = new MemoryStream();
-                    workbook.SaveAs(workbookStream);
-                    workbookStream.Position = 0;
+                await using var workbookStream = new MemoryStream();
+                workbook.SaveAs(workbookStream);
+                workbookStream.Position = 0;
 
-                    await Client.SendDocumentAsync(
-                        message.Chat.Id,
-                        new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
-                        cancellationToken: cancellationToken
-                    );
-                }
-
-                break;
-
-            case BotCommands.DevSeedCommand:
-                await _databaseManager.InsertResultAsync(
-                    new Result
-                    {
-                        UserId = message.From.Id,
-                        FullName = state.Data.FullName ?? string.Empty,
-                        PhoneNumber = state.Data.PhoneNumber ?? string.Empty,
-                        UserType = state.Data.UserType ?? string.Empty,
-                        Institution = state.Data.Institution ?? string.Empty,
-                        CurrentCourse = state.Data.CurrentCourse ?? string.Empty,
-                        PossibleType = string.Empty,
-                        Timestamp = DateTimeOffset.Now
-                    },
-                    cancellationToken
+                await Client.SendDocumentAsync(
+                    chatId: message.Chat.Id,
+                    document: new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
+                    cancellationToken: cancellationToken
                 );
 
                 break;
+            }
         }
     }
 }

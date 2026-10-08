@@ -1,5 +1,4 @@
 using ElkollegeGuidanceBot.Models.Database;
-using ElkollegeGuidanceBot.Models.Guidance.Options;
 using Telegram.BotAPI.AvailableTypes;
 using Telegram.BotAPI.Extensions;
 
@@ -39,16 +38,18 @@ public static class BotKeyboards
         );
 
     public static InlineKeyboardMarkup TestOptionsQuestion(
-        GuidanceOptionsQuestion question,
+        int[] answerIndexes,
         int blockIndex,
         int questionIndex
     )
     {
         var keyboardBuilder = new InlineKeyboardBuilder();
 
-        for (var i = 0; i < question.Answers.Length; i++)
+        for (var index = 0; index < answerIndexes.Length; index++)
         {
-            keyboardBuilder.Append(BotButtons.OptionsQuestionAnswer(blockIndex, questionIndex, i));
+            var answerIndex = answerIndexes[index];
+
+            keyboardBuilder.Append(BotButtons.OptionsQuestionAnswer(blockIndex, questionIndex, answerIndex, index + 1));
         }
 
         return new InlineKeyboardMarkup(keyboardBuilder);
