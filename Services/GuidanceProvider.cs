@@ -1,3 +1,4 @@
+using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Models.Guidance;
 using ElkollegeGuidanceBot.Models.Guidance.Binary;
 using ElkollegeGuidanceBot.Models.Guidance.Options;
@@ -33,5 +34,18 @@ public class GuidanceProvider
             .Build();
 
         Test = deserializer.Deserialize<GuidanceTest>(File.ReadAllText(guidanceTestPath));
+    }
+
+    public GuidanceType GetPossibleType(State state)
+    {
+        var maxRating = state.Data.GuidanceTypeRatings.Values.Max();
+
+        var possibleTypeIndex = state.Data.GuidanceTypeRatings
+            .Where(pair => pair.Value == maxRating)
+            .Select(pair => pair.Key)
+            .Shuffle()
+            .First();
+
+        return Test.Types[possibleTypeIndex];
     }
 }

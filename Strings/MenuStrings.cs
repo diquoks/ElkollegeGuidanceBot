@@ -63,12 +63,12 @@ public static class MenuStrings
     public static string InputCurrentCourse =>
         "Введи направление, на котором сейчас обучаешься:";
 
-    public static string PossibleType(GuidanceType type) =>
+    public static string TestResults(GuidanceType possibleType) =>
         $"""
          <b>Тестирование окончено!</b>
-         Твой тип: {type.Class} ({type.Name}).
+         Твой тип: {possibleType.Class} ({possibleType.Name}).
 
-         Подходящие профессии: {string.Join(", ", type.Professions)}.
+         Подходящие профессии: {string.Join(", ", possibleType.Professions)}.
          """;
 
     #region Alerts

@@ -167,10 +167,14 @@ public partial class TelegramBot
                 var blockIndex = int.Parse(blockIndexString);
                 var questionIndex = int.Parse(questionIndexString);
 
+                state = SaveAnswerToState(
+                    state,
+                    blockIndex,
+                    questionIndex,
+                    answerString
+                );
+
                 var block = _guidanceProvider.Test.Blocks[blockIndex];
-
-                // TODO: add answer to state
-
                 questionIndex++;
 
                 if (questionIndex < block.Questions.Count)
@@ -296,12 +300,9 @@ public partial class TelegramBot
                     .Shuffle()
                     .ToArray();
 
-                question = question with
-                {
-                    Answers = [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Answer)]
-                };
-
-                messageText = MenuStrings.TestOptionsQuestion(question);
+                messageText = MenuStrings.TestOptionsQuestion(
+                    question with { Answers = [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Answer)] }
+                );
                 replyMarkup = BotKeyboards.TestOptionsQuestion(
                     [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Index)],
                     blockIndex,
@@ -334,6 +335,47 @@ public partial class TelegramBot
             replyMarkup: replyMarkup,
             cancellationToken: cancellationToken
         );
+
+        return state;
+    }
+
+    private State SaveAnswerToState(
+        State state,
+        int blockIndex,
+        int questionIndex,
+        string answerString
+    )
+    {
+        var block = _guidanceProvider.Test.Blocks[blockIndex];
+
+        switch (block.Type)
+        {
+            case GuidanceBlockType.Options:
+            {
+                var typeIndex = int.Parse(answerString);
+
+                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(typeIndex);
+                state.Data.GuidanceTypeRatings[typeIndex] = ++typeRating;
+
+                break;
+            }
+            case GuidanceBlockType.Binary:
+            {
+                var binaryBlock = (GuidanceBinaryBlock)block;
+                var question = binaryBlock.Questions[questionIndex];
+                var answer = Convert.ToBoolean(answerString);
+
+                if (answer)
+                {
+                    var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(question.TypeIndex);
+                    state.Data.GuidanceTypeRatings[question.TypeIndex] = ++typeRating;
+                }
+
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(block.Type), block.Type, "Unknown block type.");
+        }
 
         return state;
     }

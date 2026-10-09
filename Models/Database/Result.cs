@@ -39,14 +39,14 @@ public record Result
     public required string PossibleType { get; init; }
 
     [XLColumn(Ignore = true)]
-    public required DateTimeOffset Timestamp { get; init; }
+    public required DateTimeOffset CreatedTimestamp { get; init; }
 
     [UsedImplicitly]
     [XLColumn(Header = "Время прохождения")]
     public string Created
     {
-        get => Timestamp.ToString();
-        init => Timestamp = DateTimeOffset.Parse(value);
+        get => CreatedTimestamp.ToString();
+        init => CreatedTimestamp = DateTimeOffset.Parse(value);
     }
 }
 

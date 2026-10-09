@@ -51,6 +51,8 @@ public record StateData
 
     public int PhoneNumberRetries { get; set; }
 
+    public Dictionary<int, int> GuidanceTypeRatings { get; init; } = new();
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public UserType? UserType { get; set; }
 

@@ -86,7 +86,42 @@ public partial class TelegramBot
                 break;
             }
             case StateType.InputInstitution:
-                throw new NotImplementedException();
+            {
+                state.Data.Institution = message.Text;
+
+                if (state.Data.UserType is UserType.Schoolkid)
+                {
+                    state = await SendTestResultsAsync(
+                        message,
+                        state,
+                        cancellationToken
+                    );
+
+                    break;
+                }
+
+                state.Type = StateType.InputCurrentCourse;
+
+                await Client.SendMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: MenuStrings.InputCurrentCourse,
+                    cancellationToken: cancellationToken
+                );
+
+                break;
+            }
+            case StateType.InputCurrentCourse:
+            {
+                state.Data.CurrentCourse = message.Text;
+
+                state = await SendTestResultsAsync(
+                    message,
+                    state,
+                    cancellationToken
+                );
+
+                break;
+            }
         }
 
         await _databaseManager.UpsertStateAsync(state, cancellationToken);
@@ -112,6 +147,41 @@ public partial class TelegramBot
             replyMarkup: BotKeyboards.TestBlock(blockIndex),
             cancellationToken: cancellationToken
         );
+
+        return state;
+    }
+
+    private async Task<State> SendTestResultsAsync(
+        Message message,
+        State state,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var possibleType = _guidanceProvider.GetPossibleType(state);
+
+        await Client.SendMessageAsync(
+            chatId: message.Chat.Id,
+            text: MenuStrings.TestResults(possibleType),
+            parseMode: DefaultParseMode,
+            cancellationToken: cancellationToken
+        );
+
+        await _databaseManager.InsertResultAsync(
+            new Result
+            {
+                UserId = message.From!.Id,
+                FullName = state.Data.FullName ?? string.Empty,
+                PhoneNumber = state.Data.PhoneNumber ?? string.Empty,
+                UserType = state.Data.UserType?.GetDescription() ?? string.Empty,
+                Institution = state.Data.Institution ?? string.Empty,
+                CurrentCourse = state.Data.CurrentCourse ?? string.Empty,
+                PossibleType = possibleType.Class,
+                CreatedTimestamp = DateTimeOffset.Now
+            },
+            cancellationToken
+        );
+
+        state.Clear();
 
         return state;
     }
