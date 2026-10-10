@@ -1,3 +1,4 @@
+using ElkollegeGuidanceBot.Strings;
 using Telegram.BotAPI.AvailableTypes;
 
 namespace ElkollegeGuidanceBot.Helpers;
@@ -10,7 +11,7 @@ public static class BotCommands
 
     public static BotCommand[] AllCommands =>
     [
-        new(StartCommand, "Пройти тестирование"),
-        new(ExportCommand, "Экспортировать БД")
+        new(StartCommand, OtherStrings.Commands.Start),
+        new(ExportCommand, OtherStrings.Commands.Export)
     ];
 }

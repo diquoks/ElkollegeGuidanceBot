@@ -2,24 +2,18 @@ namespace ElkollegeGuidanceBot.Strings;
 
 public static class ButtonStrings
 {
-    public static string StartTest =>
+    public const string StartTest =
         "Начать тестирование";
 
-    public static string StartNewTest =>
+    public const string StartNewTest =
         "Начать новое тестирование";
 
-    public static string Agree =>
+    public const string Agree =
         "Соглашаюсь";
 
-    public static string Disagree =>
+    public const string Disagree =
         "Не соглашаюсь";
 
-    public static string Continue =>
+    public const string Continue =
         "Продолжить";
-
-    public static string Yes =>
-        "Скорее да";
-
-    public static string No =>
-        "Скорее нет";
 }

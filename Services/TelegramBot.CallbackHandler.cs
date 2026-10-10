@@ -238,9 +238,13 @@ public partial class TelegramBot
             }
             default:
             {
+                var isStateEmpty = state.Type is StateType.Empty;
+
                 await Client.AnswerCallbackQueryAsync(
                     callbackQueryId: callbackQuery.Id,
-                    text: MenuStrings.TestUnavailable,
+                    text: isStateEmpty
+                        ? OtherStrings.Alerts.ButtonUnavailable
+                        : OtherStrings.Alerts.HasActiveTest,
                     showAlert: true,
                     cancellationToken: cancellationToken
                 );
@@ -352,10 +356,12 @@ public partial class TelegramBot
         {
             case GuidanceBlockType.Options:
             {
-                var typeIndex = int.Parse(answerString);
+                var optionsBlock = (GuidanceOptionsBlock)block;
+                var question = optionsBlock.Questions[questionIndex];
+                var answer = question.Answers[int.Parse(answerString)];
 
-                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(typeIndex);
-                state.Data.GuidanceTypeRatings[typeIndex] = ++typeRating;
+                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(answer.TypeIndex);
+                state.Data.GuidanceTypeRatings[answer.TypeIndex] = typeRating + 1;
 
                 break;
             }
@@ -363,13 +369,10 @@ public partial class TelegramBot
             {
                 var binaryBlock = (GuidanceBinaryBlock)block;
                 var question = binaryBlock.Questions[questionIndex];
-                var answer = Convert.ToBoolean(answerString);
+                var answerValue = int.Parse(answerString);
 
-                if (answer)
-                {
-                    var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(question.TypeIndex);
-                    state.Data.GuidanceTypeRatings[question.TypeIndex] = ++typeRating;
-                }
+                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(question.TypeIndex);
+                state.Data.GuidanceTypeRatings[question.TypeIndex] = typeRating + answerValue;
 
                 break;
             }

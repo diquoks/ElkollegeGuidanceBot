@@ -1,4 +1,6 @@
 using ElkollegeGuidanceBot.Models.Database;
+using ElkollegeGuidanceBot.Models.Guidance.Binary;
+using ElkollegeGuidanceBot.Models.Guidance.Options;
 using Telegram.BotAPI.AvailableTypes;
 using Telegram.BotAPI.Extensions;
 
@@ -45,12 +47,17 @@ public static class BotKeyboards
     {
         var keyboardBuilder = new InlineKeyboardBuilder();
 
-        for (var index = 0; index < answerIndexes.Length; index++)
-        {
-            var answerIndex = answerIndexes[index];
+        var buttons = answerIndexes.Select((answerIndex, i) =>
+            BotButtons.OptionsQuestionAnswer(
+                blockIndex,
+                questionIndex,
+                answerIndex,
+                GuidanceOptionsAnswer.GetChar(i)
+            )
+        );
 
-            keyboardBuilder.Append(BotButtons.OptionsQuestionAnswer(blockIndex, questionIndex, answerIndex, index + 1));
-        }
+        foreach (var button in buttons)
+            keyboardBuilder.Append(button);
 
         return new InlineKeyboardMarkup(keyboardBuilder);
     }
@@ -58,8 +65,9 @@ public static class BotKeyboards
     public static InlineKeyboardMarkup TestBinaryQuestion(int blockIndex, int questionIndex) =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, true))
-                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, false))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.Yes))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.ProbablyYes))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.No))
         );
 
     public static InlineKeyboardMarkup SelectUserType =>

@@ -44,11 +44,14 @@ public static class MenuStrings
     private static string TestQuestionTitle(GuidanceBlockQuestion question) =>
         $"<b>{question.Question}</b>";
 
+    private static string TestOptionsAnswer(GuidanceOptionsAnswer answer, int answerIndex) =>
+        $"{GuidanceOptionsAnswer.GetChar(answerIndex)}. {answer.Answer}";
+
     public static string TestOptionsQuestion(GuidanceOptionsQuestion question) =>
         $"""
          {TestQuestionTitle(question)}
 
-         {string.Join('\n', question.Answers.Select((answer, i) => $"{i + 1}. {answer.Answer}"))}
+         {string.Join('\n', question.Answers.Select(TestOptionsAnswer))}
          """;
 
     public static string TestBinaryQuestion(GuidanceBinaryQuestion question) =>
@@ -70,11 +73,4 @@ public static class MenuStrings
 
          Подходящие профессии: {string.Join(", ", possibleType.Professions)}.
          """;
-
-    #region Alerts
-
-    public static string TestUnavailable =>
-        "Данное тестирование недоступно, начни новое!";
-
-    #endregion
 }

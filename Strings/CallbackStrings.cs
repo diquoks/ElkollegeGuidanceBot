@@ -29,9 +29,6 @@ public static class CallbackStrings
     public static string TestAnswerCallback(int blockIndex, int questionIndex, int answer) =>
         $"{TestAnswer} {blockIndex} {questionIndex} {answer}";
 
-    public static string TestAnswerCallback(int blockIndex, int questionIndex, bool answer) =>
-        $"{TestAnswer} {blockIndex} {questionIndex} {Convert.ToString(answer)}";
-
     public const string SelectUserType =
         "select_user_type";
 
