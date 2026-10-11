@@ -23,10 +23,18 @@ public partial class TelegramBot
         )
             return;
 
-        var isAdmin = _admins.Contains(message.From.Id);
         var state = await _databaseManager.GetUserStateAsync(message.From.Id, cancellationToken);
+        var isAdmin = _admins.Contains(message.From.Id);
 
-        _logger.LogBotInteraction(message.From!, message.Text, new { IsAdmin = isAdmin, State = state.Type });
+        _logger.LogBotInteraction(
+            message.From!,
+            message.Text,
+            new
+            {
+                State = state.Type,
+                IsAdmin = isAdmin
+            }
+        );
 
         switch (commandName)
         {

@@ -25,8 +25,17 @@ public partial class TelegramBot
             return;
 
         var state = await _databaseManager.GetUserStateAsync(callbackQuery.From.Id, cancellationToken);
+        var isExpectedCallback = callbackQuery.Data.Contains(state.Data.NextExpectedCallback);
 
-        _logger.LogBotInteraction(callbackQuery.From, callbackQuery.Data, new { State = state.Type });
+        _logger.LogBotInteraction(
+            callbackQuery.From,
+            callbackQuery.Data,
+            new
+            {
+                State = state.Type,
+                IsExpectedCallback = isExpectedCallback
+            }
+        );
 
         switch (callbackQuery.Data.Split())
         {
@@ -140,7 +149,7 @@ public partial class TelegramBot
             [
                 CallbackStrings.TestBlock,
                 var blockIndexString
-            ] when state.Type is StateType.GuidanceTest && callbackQuery.Data.Contains(state.Data.NextExpectedCallback):
+            ] when state.Type is StateType.GuidanceTest && isExpectedCallback:
             {
                 var blockIndex = int.Parse(blockIndexString);
 
@@ -162,7 +171,7 @@ public partial class TelegramBot
                 var blockIndexString,
                 var questionIndexString,
                 var answerString
-            ] when state.Type is StateType.GuidanceTest && callbackQuery.Data.Contains(state.Data.NextExpectedCallback):
+            ] when state.Type is StateType.GuidanceTest && isExpectedCallback:
             {
                 var blockIndex = int.Parse(blockIndexString);
                 var questionIndex = int.Parse(questionIndexString);

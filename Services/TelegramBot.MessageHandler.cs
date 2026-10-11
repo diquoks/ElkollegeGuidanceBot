@@ -31,9 +31,15 @@ public partial class TelegramBot
 
         var state = await _databaseManager.GetUserStateAsync(message.From.Id, cancellationToken);
 
-        _logger.LogBotInteraction(message.From, $"\"{message.Text}\"", new { State = state.Type });
+        _logger.LogBotInteraction(
+            message.From,
+            $"\"{message.Text}\"",
+            new
+            {
+                State = state.Type
+            }
+        );
 
-        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (state.Type)
         {
             case StateType.InputFullName:
