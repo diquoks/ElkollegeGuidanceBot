@@ -11,6 +11,9 @@ public enum GuidanceBinaryAnswer
     [Description(OtherStrings.GuidanceBinaryAnswer.ProbablyYes)]
     ProbablyYes = 1,
 
+    [Description(OtherStrings.GuidanceBinaryAnswer.ProbablyNo)]
+    ProbablyNo = 0,
+
     [Description(OtherStrings.GuidanceBinaryAnswer.No)]
-    No = 0
+    No = -1
 }

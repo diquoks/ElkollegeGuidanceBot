@@ -67,6 +67,7 @@ public static class BotKeyboards
             new InlineKeyboardBuilder()
                 .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.Yes))
                 .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.ProbablyYes))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.ProbablyNo))
                 .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.No))
         );
 

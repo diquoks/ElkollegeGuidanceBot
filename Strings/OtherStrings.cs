@@ -82,6 +82,9 @@ public static class OtherStrings
         public const string ProbablyYes =
             "Скорее да";
 
+        public const string ProbablyNo =
+            "Скорее нет";
+
         public const string No =
             "Нет";
     }
