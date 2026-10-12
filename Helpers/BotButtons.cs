@@ -59,9 +59,9 @@ public static class BotButtons
             CallbackData = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex, (int)answer)
         };
 
-    public static InlineKeyboardButton SelectUserType(UserType userType) =>
-        new(userType.GetDescription())
+    public static InlineKeyboardButton SelectUserStatus(UserStatus userStatus) =>
+        new(userStatus.GetDescription())
         {
-            CallbackData = CallbackStrings.SelectUserTypeCallback((int)userType)
+            CallbackData = CallbackStrings.SelectUserStatusCallback((int)userStatus)
         };
 }

@@ -26,19 +26,20 @@ public class DatabaseManager
             CREATE TABLE IF NOT EXISTS states (
                 UserId   INTEGER NOT NULL PRIMARY KEY,
                 Type     INTEGER NOT NULL,
-                DataJson TEXT NOT NULL CHECK(json_valid(DataJson))
+                DataJson TEXT    NOT NULL CHECK(json_valid(DataJson))
             );
 
             CREATE TABLE IF NOT EXISTS results (
                 Id            INTEGER PRIMARY KEY,
                 UserId        INTEGER NOT NULL,
-                FullName      TEXT NOT NULL,
-                PhoneNumber   TEXT NOT NULL,
-                UserType      TEXT NOT NULL,
-                Institution   TEXT NOT NULL,
-                CurrentCourse TEXT NOT NULL,
-                PossibleType  TEXT NOT NULL,
-                Created       TEXT NOT NULL
+                FullName      TEXT,
+                PhoneNumber   TEXT,
+                UserStatus    TEXT,
+                Institution   TEXT,
+                CurrentCourse TEXT,
+                PossibleType  TEXT    NOT NULL,
+                TypeRatings   TEXT    NOT NULL,
+                Created       TEXT    NOT NULL
             );
             """
         );
@@ -90,20 +91,22 @@ public class DatabaseManager
                     UserId,
                     FullName,
                     PhoneNumber,
-                    UserType,
+                    UserStatus,
                     Institution,
                     CurrentCourse,
                     PossibleType,
+                    TypeRatings,
                     Created
                 )
                 VALUES (
                     @UserId,
-                    SUBSTR(@FullName, 1, 100),
-                    SUBSTR(@PhoneNumber, 1, 50),
-                    SUBSTR(@UserType, 1, 50),
-                    SUBSTR(@Institution, 1, 100),
+                    SUBSTR(@FullName,      1, 100),
+                    SUBSTR(@PhoneNumber,   1, 50 ),
+                    SUBSTR(@UserStatus,    1, 100),
+                    SUBSTR(@Institution,   1, 100),
                     SUBSTR(@CurrentCourse, 1, 100),
-                    SUBSTR(@PossibleType, 1, 100),
+                    @PossibleType,
+                    @TypeRatings,
                     @Created
                 );
                 """,

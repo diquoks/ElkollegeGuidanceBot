@@ -1,3 +1,4 @@
+using ElkollegeGuidanceBot.Extensions;
 using ElkollegeGuidanceBot.Models.Database;
 using ElkollegeGuidanceBot.Models.Guidance;
 using ElkollegeGuidanceBot.Models.Guidance.Binary;
@@ -38,14 +39,37 @@ public class GuidanceProvider
 
     public GuidanceType GetPossibleType(State state)
     {
-        var maxRating = state.Data.GuidanceTypeRatings.Values.Max();
-
-        var possibleTypeIndex = state.Data.GuidanceTypeRatings
+        var maxRating = state.Data.TypeRatings.Values.Max();
+        var possibleTypeIndex = state.Data.TypeRatings
             .Where(pair => pair.Value == maxRating)
             .Select(pair => pair.Key)
             .Shuffle()
             .First();
 
         return Test.Types[possibleTypeIndex];
+    }
+
+    public Result GetResult(State state, GuidanceType possibleType)
+    {
+        var ratingsSum = state.Data.TypeRatings.Values.Sum();
+        var ratingRatios = state.Data.TypeRatings
+            .OrderByDescending(pair => pair.Value)
+            .Select(pair => $"{Test.Types[pair.Key].Class}: {(double)pair.Value / ratingsSum:P}")
+            .ToArray();
+
+        return new Result
+        {
+            UserId = state.UserId,
+            FullName = state.Data.FullName,
+            PhoneNumber = state.Data.PhoneNumber,
+            UserStatus = state.Data.UserStatus is UserStatus.Other
+                ? state.Data.OtherUserStatus
+                : state.Data.UserStatus.GetDescription(),
+            Institution = state.Data.Institution,
+            CurrentCourse = state.Data.CurrentCourse,
+            PossibleType = possibleType.Class,
+            TypeRatings = string.Join(" | ", ratingRatios),
+            CreatedTimestamp = DateTimeOffset.Now
+        };
     }
 }

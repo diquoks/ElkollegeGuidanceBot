@@ -29,9 +29,9 @@ public static class CallbackStrings
     public static string TestAnswerCallback(int blockIndex, int questionIndex, int answer) =>
         $"{TestAnswer} {blockIndex} {questionIndex} {answer}";
 
-    public const string SelectUserType =
-        "select_user_type";
+    public const string SelectUserStatus =
+        "select_user_status";
 
-    public static string SelectUserTypeCallback(int userType) =>
-        $"{SelectUserType} {userType}";
+    public static string SelectUserStatusCallback(int userStatus) =>
+        $"{SelectUserStatus} {userStatus}";
 }

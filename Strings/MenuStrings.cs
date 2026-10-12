@@ -57,8 +57,11 @@ public static class MenuStrings
     public static string TestBinaryQuestion(GuidanceBinaryQuestion question) =>
         TestQuestionTitle(question);
 
-    public static string SelectUserType =>
+    public static string SelectUserStatus =>
         "Выбери свой текущий статус:";
+
+    public static string InputOtherUserStatus =>
+        "Введи свой текущий статус:";
 
     public static string InputInstitution =>
         "Введи название своего текущего учебного заведения:";

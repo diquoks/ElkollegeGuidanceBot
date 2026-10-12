@@ -34,31 +34,37 @@ public enum StateType
     InputFullName,
     InputPhoneNumber,
     GuidanceTest,
-    SelectUserType,
+    SelectUserStatus,
+    InputOtherUserStatus,
     InputInstitution,
     InputCurrentCourse
 }
 
 public record StateData
 {
-    public string NextExpectedCallback { get; set; } = string.Empty;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? NextExpectedCallback { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? FullName { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? PhoneNumber { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int PhoneNumberRetries { get; set; }
 
-    public Dictionary<int, int> GuidanceTypeRatings { get; init; } = new();
+    public Dictionary<int, int> TypeRatings { get; init; } = new();
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public UserType? UserType { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public UserStatus UserStatus { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? OtherUserStatus { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Institution { get; set; }
 
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? CurrentCourse { get; set; }
 }

@@ -71,12 +71,14 @@ public static class BotKeyboards
                 .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.No))
         );
 
-    public static InlineKeyboardMarkup SelectUserType =>
+    public static InlineKeyboardMarkup SelectUserStatus =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.SelectUserType(UserType.Schoolkid))
+                .Append(BotButtons.SelectUserStatus(UserStatus.Schoolkid))
                 .AppendRow()
-                .Append(BotButtons.SelectUserType(UserType.CollegeStudent))
-                .Append(BotButtons.SelectUserType(UserType.UniversityStudent))
+                .Append(BotButtons.SelectUserStatus(UserStatus.CollegeStudent))
+                .Append(BotButtons.SelectUserStatus(UserStatus.UniversityStudent))
+                .AppendRow()
+                .Append(BotButtons.SelectUserStatus(UserStatus.Other))
         );
 }

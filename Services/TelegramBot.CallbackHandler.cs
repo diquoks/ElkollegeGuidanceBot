@@ -25,7 +25,8 @@ public partial class TelegramBot
             return;
 
         var state = await _databaseManager.GetUserStateAsync(callbackQuery.From.Id, cancellationToken);
-        var isExpectedCallback = callbackQuery.Data.Contains(state.Data.NextExpectedCallback);
+        var isExpectedCallback = string.IsNullOrEmpty(state.Data.NextExpectedCallback) ||
+                                 callbackQuery.Data.Contains(state.Data.NextExpectedCallback);
 
         _logger.LogBotInteraction(
             callbackQuery.From,
@@ -213,13 +214,14 @@ public partial class TelegramBot
                     break;
                 }
 
-                state.Type = StateType.SelectUserType;
+                state.Type = StateType.SelectUserStatus;
+                state.Data.NextExpectedCallback = null;
 
                 await Client.EditMessageTextAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     messageId: callbackQuery.Message.MessageId,
-                    text: MenuStrings.SelectUserType,
-                    replyMarkup: BotKeyboards.SelectUserType,
+                    text: MenuStrings.SelectUserStatus,
+                    replyMarkup: BotKeyboards.SelectUserStatus,
                     cancellationToken: cancellationToken
                 );
 
@@ -227,13 +229,28 @@ public partial class TelegramBot
             }
             case
             [
-                CallbackStrings.SelectUserType,
-                var userTypeString
-            ] when state.Type is StateType.SelectUserType:
+                CallbackStrings.SelectUserStatus,
+                var userStatusString
+            ] when state.Type is StateType.SelectUserStatus:
             {
-                var userType = (UserType)int.Parse(userTypeString);
+                var userStatus = (UserStatus)int.Parse(userStatusString);
 
-                state.Data.UserType = userType;
+                state.Data.UserStatus = userStatus;
+
+                if (userStatus is UserStatus.Other)
+                {
+                    state.Type = StateType.InputOtherUserStatus;
+
+                    await Client.EditMessageTextAsync(
+                        chatId: callbackQuery.Message.Chat.Id,
+                        messageId: callbackQuery.Message.MessageId,
+                        text: MenuStrings.InputOtherUserStatus,
+                        cancellationToken: cancellationToken
+                    );
+
+                    break;
+                }
+
                 state.Type = StateType.InputInstitution;
 
                 await Client.EditMessageTextAsync(
@@ -369,8 +386,8 @@ public partial class TelegramBot
                 var question = optionsBlock.Questions[questionIndex];
                 var answer = question.Answers[int.Parse(answerString)];
 
-                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(answer.TypeIndex);
-                state.Data.GuidanceTypeRatings[answer.TypeIndex] = typeRating + 1;
+                var typeRating = state.Data.TypeRatings.GetValueOrDefault(answer.TypeIndex);
+                state.Data.TypeRatings[answer.TypeIndex] = typeRating + 1;
 
                 break;
             }
@@ -380,8 +397,8 @@ public partial class TelegramBot
                 var question = binaryBlock.Questions[questionIndex];
                 var answerValue = int.Parse(answerString);
 
-                var typeRating = state.Data.GuidanceTypeRatings.GetValueOrDefault(question.TypeIndex);
-                state.Data.GuidanceTypeRatings[question.TypeIndex] = typeRating + answerValue;
+                var typeRating = state.Data.TypeRatings.GetValueOrDefault(question.TypeIndex);
+                state.Data.TypeRatings[question.TypeIndex] = typeRating + answerValue;
 
                 break;
             }

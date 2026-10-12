@@ -17,27 +17,31 @@ public record Result
 
     [UsedImplicitly]
     [XLColumn(Header = OtherStrings.Result.FullName)]
-    public required string FullName { get; init; }
+    public required string? FullName { get; init; }
 
     [UsedImplicitly]
     [XLColumn(Header = OtherStrings.Result.PhoneNumber)]
-    public required string PhoneNumber { get; init; }
+    public required string? PhoneNumber { get; init; }
 
     [UsedImplicitly]
-    [XLColumn(Header = OtherStrings.Result.Type)]
-    public required string UserType { get; init; }
+    [XLColumn(Header = OtherStrings.Result.Status)]
+    public required string? UserStatus { get; init; }
 
     [UsedImplicitly]
     [XLColumn(Header = OtherStrings.Result.Institution)]
-    public required string Institution { get; init; }
+    public required string? Institution { get; init; }
 
     [UsedImplicitly]
     [XLColumn(Header = OtherStrings.Result.CurrentCourse)]
-    public required string CurrentCourse { get; init; }
+    public required string? CurrentCourse { get; init; }
 
     [UsedImplicitly]
     [XLColumn(Header = OtherStrings.Result.PossibleType)]
     public required string PossibleType { get; init; }
+
+    [UsedImplicitly]
+    [XLColumn(Header = OtherStrings.Result.TypeRatings)]
+    public required string TypeRatings { get; init; }
 
     [XLColumn(Ignore = true)]
     public required DateTimeOffset CreatedTimestamp { get; init; }
@@ -51,14 +55,17 @@ public record Result
     }
 }
 
-public enum UserType
+public enum UserStatus
 {
-    [Description(OtherStrings.UserType.Schoolkid)]
-    Schoolkid,
+    [Description(OtherStrings.UserStatus.Schoolkid)]
+    Schoolkid = 1,
 
-    [Description(OtherStrings.UserType.CollegeStudent)]
-    CollegeStudent,
+    [Description(OtherStrings.UserStatus.CollegeStudent)]
+    CollegeStudent = 2,
 
-    [Description(OtherStrings.UserType.UniversityStudent)]
-    UniversityStudent
+    [Description(OtherStrings.UserStatus.UniversityStudent)]
+    UniversityStudent = 3,
+
+    [Description(OtherStrings.UserStatus.Other)]
+    Other = 0
 }

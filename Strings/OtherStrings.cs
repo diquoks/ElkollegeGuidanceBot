@@ -34,8 +34,8 @@ public static class OtherStrings
         public const string PhoneNumber =
             "Телефон";
 
-        public const string Type =
-            "Тип";
+        public const string Status =
+            "Статус";
 
         public const string Institution =
             "Учебное заведение";
@@ -45,6 +45,9 @@ public static class OtherStrings
 
         public const string PossibleType =
             "Возможный тип";
+
+        public const string TypeRatings =
+            "Рейтинг типов";
 
         public const string Created =
             "Время прохождения";
@@ -62,7 +65,7 @@ public static class OtherStrings
             "Профессии";
     }
 
-    public static class UserType
+    public static class UserStatus
     {
         public const string Schoolkid =
             "Школьник";
@@ -72,6 +75,9 @@ public static class OtherStrings
 
         public const string UniversityStudent =
             "Студент вуза";
+
+        public const string Other =
+            "Прочий";
     }
 
     public static class GuidanceBinaryAnswer

@@ -91,11 +91,23 @@ public partial class TelegramBot
 
                 break;
             }
+            case StateType.InputOtherUserStatus:
+            {
+                state.Data.OtherUserStatus = message.Text;
+
+                state = await SendTestResultsAsync(
+                    message,
+                    state,
+                    cancellationToken
+                );
+
+                break;
+            }
             case StateType.InputInstitution:
             {
                 state.Data.Institution = message.Text;
 
-                if (state.Data.UserType is UserType.Schoolkid)
+                if (state.Data.UserStatus is UserStatus.Schoolkid)
                 {
                     state = await SendTestResultsAsync(
                         message,
@@ -173,17 +185,7 @@ public partial class TelegramBot
         );
 
         await _databaseManager.InsertResultAsync(
-            new Result
-            {
-                UserId = message.From!.Id,
-                FullName = state.Data.FullName ?? string.Empty,
-                PhoneNumber = state.Data.PhoneNumber ?? string.Empty,
-                UserType = state.Data.UserType?.GetDescription() ?? string.Empty,
-                Institution = state.Data.Institution ?? string.Empty,
-                CurrentCourse = state.Data.CurrentCourse ?? string.Empty,
-                PossibleType = possibleType.Class,
-                CreatedTimestamp = DateTimeOffset.Now
-            },
+            _guidanceProvider.GetResult(state, possibleType),
             cancellationToken
         );
 
