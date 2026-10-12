@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ElkollegeGuidanceBot.Extensions;
 using ElkollegeGuidanceBot.Helpers;
 using ElkollegeGuidanceBot.Models.Database;
@@ -25,8 +26,7 @@ public partial class TelegramBot
             return;
 
         var state = await _databaseManager.GetUserStateAsync(callbackQuery.From.Id, cancellationToken);
-        var isExpectedCallback = string.IsNullOrEmpty(state.Data.NextExpectedCallback) ||
-                                 callbackQuery.Data.Contains(state.Data.NextExpectedCallback);
+        var isExpectedCallback = CheckIsExpectedCallback(callbackQuery, state);
 
         _logger.LogBotInteraction(
             callbackQuery.From,
@@ -282,6 +282,19 @@ public partial class TelegramBot
         await _databaseManager.UpsertStateAsync(state, cancellationToken);
     }
 
+    private bool CheckIsExpectedCallback(CallbackQuery callbackQuery, State state)
+    {
+        var expected = state.Data.NextExpectedCallback;
+        var actual = callbackQuery.Data;
+
+        if (string.IsNullOrEmpty(actual))
+            throw new UnreachableException();
+
+        return string.IsNullOrEmpty(expected) ||
+               actual == expected ||
+               actual.StartsWith($"{expected} ");
+    }
+
     private async Task<State> ProceedToTestBlockAsync(
         CallbackQuery callbackQuery,
         State state,
@@ -289,13 +302,16 @@ public partial class TelegramBot
         CancellationToken cancellationToken = default
     )
     {
+        if (callbackQuery.Message is null)
+            throw new UnreachableException();
+
         var block = _guidanceProvider.Test.Blocks[blockIndex];
 
         state.Data.NextExpectedCallback = CallbackStrings.TestBlockCallback(blockIndex);
 
         await Client.EditMessageTextAsync(
-            chatId: callbackQuery.Message!.Chat.Id,
-            messageId: callbackQuery.Message!.MessageId,
+            chatId: callbackQuery.Message.Chat.Id,
+            messageId: callbackQuery.Message.MessageId,
             text: MenuStrings.TestBlock(block),
             parseMode: DefaultParseMode,
             replyMarkup: BotKeyboards.TestBlock(blockIndex),
@@ -313,6 +329,9 @@ public partial class TelegramBot
         CancellationToken cancellationToken = default
     )
     {
+        if (callbackQuery.Message is null)
+            throw new UnreachableException();
+
         var block = _guidanceProvider.Test.Blocks[blockIndex];
 
         string messageText;
@@ -352,14 +371,14 @@ public partial class TelegramBot
                 break;
             }
             default:
-                throw new ArgumentOutOfRangeException(nameof(block.Type), block.Type, "Unknown block type.");
+                throw new UnreachableException();
         }
 
         state.Data.NextExpectedCallback = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex);
 
         await Client.EditMessageTextAsync(
-            chatId: callbackQuery.Message!.Chat.Id,
-            messageId: callbackQuery.Message!.MessageId,
+            chatId: callbackQuery.Message.Chat.Id,
+            messageId: callbackQuery.Message.MessageId,
             text: messageText,
             parseMode: DefaultParseMode,
             replyMarkup: replyMarkup,
@@ -403,7 +422,7 @@ public partial class TelegramBot
                 break;
             }
             default:
-                throw new ArgumentOutOfRangeException(nameof(block.Type), block.Type, "Unknown block type.");
+                throw new UnreachableException();
         }
 
         return state;
