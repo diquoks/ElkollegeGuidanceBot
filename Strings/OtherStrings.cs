@@ -26,7 +26,7 @@ public static class OtherStrings
             "ID";
 
         public const string UserId =
-            "UserId";
+            "UserID";
 
         public const string FullName =
             "ФИО";
@@ -51,6 +51,9 @@ public static class OtherStrings
 
         public const string Created =
             "Время прохождения";
+
+        public const string WorksheetName =
+            "Результаты";
     }
 
     public static class GuidanceType
@@ -63,6 +66,9 @@ public static class OtherStrings
 
         public const string Professions =
             "Профессии";
+
+        public const string WorksheetName =
+            "Типы";
     }
 
     public static class UserStatus

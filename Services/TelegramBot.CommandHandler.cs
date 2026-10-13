@@ -70,26 +70,21 @@ public partial class TelegramBot
                 var allResults = await _databaseManager.GetAllResultsAsync(cancellationToken);
 
                 using var workbook = new XLWorkbook();
-                var worksheet = workbook.Worksheets.Add();
 
-                var resultsTable = worksheet
+                workbook.Worksheets
+                    .Add(OtherStrings.Result.WorksheetName)
                     .FirstCell()
                     .InsertTable(allResults);
 
-                worksheet
-                    .Cell(
-                        resultsTable
-                            .FirstRow()
-                            .RowNumber(),
-                        resultsTable
-                            .LastColumn()
-                            .ColumnNumber() + 2
-                    )
+                workbook.Worksheets
+                    .Add(OtherStrings.GuidanceType.WorksheetName)
+                    .FirstCell()
                     .InsertTable(_guidanceProvider.Test.Types);
 
-                worksheet
-                    .Columns()
-                    .AdjustToContents();
+                foreach (var worksheet in workbook.Worksheets)
+                    worksheet
+                        .Columns()
+                        .AdjustToContents();
 
                 await using var workbookStream = new MemoryStream();
                 workbook.SaveAs(workbookStream);
