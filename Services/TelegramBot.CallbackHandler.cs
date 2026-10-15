@@ -16,13 +16,9 @@ public partial class TelegramBot
 {
     protected override async Task OnCallbackQueryAsync(
         CallbackQuery callbackQuery,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        if (
-            callbackQuery.Message is null ||
-            string.IsNullOrEmpty(callbackQuery.Data)
-        )
+        if (callbackQuery.Message is null || string.IsNullOrEmpty(callbackQuery.Data))
             return;
 
         var state = await _databaseManager.GetUserStateAsync(callbackQuery.From.Id, cancellationToken);
@@ -35,24 +31,17 @@ public partial class TelegramBot
             {
                 State = state.Type,
                 IsExpectedCallback = isExpectedCallback
-            }
-        );
+            });
 
-        switch (callbackQuery.Data.Split())
+        switch (callbackQuery.Data.Split(), state.Type)
         {
-            case
-            [
-                CallbackStrings.Start
-            ]:
+            case ([CallbackStrings.Start], _):
             {
                 state.Clear();
+
                 state.Type = StateType.PersonalDataAgreement;
 
-                await using var fileStream = new FileStream(
-                    _personalDataAgreementPath,
-                    FileMode.Open,
-                    FileAccess.Read
-                );
+                await using var fileStream = new FileStream(_personalDataAgreementPath, FileMode.Open, FileAccess.Read);
 
                 const string personalDataAgreementKey = "personal_data_agreement";
 
@@ -61,8 +50,7 @@ public partial class TelegramBot
                         new InputMediaDocument($"attach://{personalDataAgreementKey}")
                         {
                             Caption = MenuStrings.PersonalDataAgreement
-                        }
-                    )
+                        })
                     {
                         ChatId = callbackQuery.Message.Chat.Id,
                         MessageId = callbackQuery.Message.MessageId,
@@ -75,19 +63,12 @@ public partial class TelegramBot
                         },
                         ReplyMarkup = BotKeyboards.PersonalDataAgreement
                     },
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
-            case
-            [
-                CallbackStrings.PersonalDataAgreement,
-                var isAgreeString
-            ] when state.Type is StateType.PersonalDataAgreement:
+            case ([CallbackStrings.PersonalDataAgreement, var isAgreeString], StateType.PersonalDataAgreement)
+                when bool.TryParse(isAgreeString, out var isAgree):
             {
-                var isAgree = Convert.ToBoolean(isAgreeString);
-
                 if (!isAgree)
                 {
                     state.Clear();
@@ -95,15 +76,12 @@ public partial class TelegramBot
                     await Client.DeleteMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
-                        cancellationToken: cancellationToken
-                    );
+                        cancellationToken: cancellationToken);
 
                     await Client.SendMessageAsync(
                         chatId: callbackQuery.Message.Chat.Id,
                         text: MenuStrings.PersonalDataAgreementDisagree,
-                        cancellationToken: cancellationToken
-                    );
-
+                        cancellationToken: cancellationToken);
                     break;
                 }
 
@@ -112,91 +90,65 @@ public partial class TelegramBot
                 await Client.EditMessageReplyMarkupAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     messageId: callbackQuery.Message.MessageId,
-                    cancellationToken: cancellationToken
-                );
+                    cancellationToken: cancellationToken);
 
                 await Client.SendMessageAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     text: _guidanceProvider.Test.Instruction,
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Instructions,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
-            case
-            [
-                CallbackStrings.InstructionsRead
-            ] when state.Type is StateType.Instructions:
+            case ([CallbackStrings.InstructionsRead], StateType.Instructions):
             {
                 state.Type = StateType.InputFullName;
 
                 await Client.EditMessageReplyMarkupAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     messageId: callbackQuery.Message.MessageId,
-                    cancellationToken: cancellationToken
-                );
+                    cancellationToken: cancellationToken);
 
                 await Client.SendMessageAsync(
                     chatId: callbackQuery.Message.Chat.Id,
                     text: MenuStrings.InputFullName,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
-            case
-            [
-                CallbackStrings.TestBlock,
-                var blockIndexString
-            ] when state.Type is StateType.GuidanceTest && isExpectedCallback:
+            case ([CallbackStrings.TestBlock, var blockIndexString], StateType.GuidanceTest)
+                when isExpectedCallback && int.TryParse(blockIndexString, out var blockIndex):
             {
-                var blockIndex = int.Parse(blockIndexString);
-
-                const int firstQuestionIndex = 0;
-
                 state = await ProceedToTestQuestionAsync(
                     callbackQuery,
                     state,
                     blockIndex,
-                    firstQuestionIndex,
-                    cancellationToken
-                );
-
+                    0,
+                    cancellationToken);
                 break;
             }
-            case
-            [
-                CallbackStrings.TestAnswer,
-                var blockIndexString,
-                var questionIndexString,
-                var answerString
-            ] when state.Type is StateType.GuidanceTest && isExpectedCallback:
+            case ([
+                    CallbackStrings.TestAnswer,
+                    var blockIndexString,
+                    var questionIndexString,
+                    var answerString
+                ], StateType.GuidanceTest)
+                when isExpectedCallback &&
+                     int.TryParse(blockIndexString, out var blockIndex) &&
+                     int.TryParse(questionIndexString, out var questionIndex):
             {
-                var blockIndex = int.Parse(blockIndexString);
-                var questionIndex = int.Parse(questionIndexString);
+                state = SaveAnswerToState(state, blockIndex, questionIndex, answerString);
 
-                state = SaveAnswerToState(
-                    state,
-                    blockIndex,
-                    questionIndex,
-                    answerString
-                );
-
-                var block = _guidanceProvider.Test.Blocks[blockIndex];
                 questionIndex++;
+                var block = _guidanceProvider.Test.Blocks[blockIndex];
 
-                if (questionIndex < block.Questions.Count)
+                if (questionIndex < block.Questions.Length)
                 {
                     state = await ProceedToTestQuestionAsync(
                         callbackQuery,
                         state,
                         blockIndex,
                         questionIndex,
-                        cancellationToken
-                    );
-
+                        cancellationToken);
                     break;
                 }
 
@@ -208,9 +160,7 @@ public partial class TelegramBot
                         callbackQuery,
                         state,
                         blockIndex,
-                        cancellationToken
-                    );
-
+                        cancellationToken);
                     break;
                 }
 
@@ -222,19 +172,12 @@ public partial class TelegramBot
                     messageId: callbackQuery.Message.MessageId,
                     text: MenuStrings.SelectUserStatus,
                     replyMarkup: BotKeyboards.SelectUserStatus,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
-            case
-            [
-                CallbackStrings.SelectUserStatus,
-                var userStatusString
-            ] when state.Type is StateType.SelectUserStatus:
+            case ([CallbackStrings.SelectUserStatus, var userStatusString], StateType.SelectUserStatus)
+                when Enum.TryParse<UserStatus>(userStatusString, out var userStatus):
             {
-                var userStatus = (UserStatus)int.Parse(userStatusString);
-
                 state.Data.UserStatus = userStatus;
 
                 if (userStatus is UserStatus.Other)
@@ -245,9 +188,7 @@ public partial class TelegramBot
                         chatId: callbackQuery.Message.Chat.Id,
                         messageId: callbackQuery.Message.MessageId,
                         text: MenuStrings.InputOtherUserStatus,
-                        cancellationToken: cancellationToken
-                    );
-
+                        cancellationToken: cancellationToken);
                     break;
                 }
 
@@ -257,24 +198,18 @@ public partial class TelegramBot
                     chatId: callbackQuery.Message.Chat.Id,
                     messageId: callbackQuery.Message.MessageId,
                     text: MenuStrings.InputInstitution,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
             default:
             {
-                var isStateEmpty = state.Type is StateType.Empty;
-
                 await Client.AnswerCallbackQueryAsync(
                     callbackQueryId: callbackQuery.Id,
-                    text: isStateEmpty
+                    text: state.Type is StateType.Empty && isExpectedCallback
                         ? OtherStrings.Alerts.ButtonUnavailable
                         : OtherStrings.Alerts.HasActiveTest,
                     showAlert: true,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
         }
@@ -282,7 +217,7 @@ public partial class TelegramBot
         await _databaseManager.UpsertStateAsync(state, cancellationToken);
     }
 
-    private bool CheckIsExpectedCallback(CallbackQuery callbackQuery, State state)
+    private static bool CheckIsExpectedCallback(CallbackQuery callbackQuery, State state)
     {
         var expected = state.Data.NextExpectedCallback;
         var actual = callbackQuery.Data;
@@ -292,15 +227,14 @@ public partial class TelegramBot
 
         return string.IsNullOrEmpty(expected) ||
                actual == expected ||
-               actual.StartsWith($"{expected} ");
+               actual.StartsWith(expected + ' ');
     }
 
     private async Task<State> ProceedToTestBlockAsync(
         CallbackQuery callbackQuery,
         State state,
         int blockIndex,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         if (callbackQuery.Message is null)
             throw new UnreachableException();
@@ -315,8 +249,7 @@ public partial class TelegramBot
             text: MenuStrings.TestBlock(block),
             parseMode: DefaultParseMode,
             replyMarkup: BotKeyboards.TestBlock(blockIndex),
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         return state;
     }
@@ -326,8 +259,7 @@ public partial class TelegramBot
         State state,
         int blockIndex,
         int questionIndex,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         if (callbackQuery.Message is null)
             throw new UnreachableException();
@@ -350,14 +282,11 @@ public partial class TelegramBot
                     .ToArray();
 
                 messageText = MenuStrings.TestOptionsQuestion(
-                    question with { Answers = [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Answer)] }
-                );
+                    question with { Answers = [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Answer)] });
                 replyMarkup = BotKeyboards.TestOptionsQuestion(
                     [.. shuffledAnswersWithIndexes.Select(tuple => tuple.Index)],
                     blockIndex,
-                    questionIndex
-                );
-
+                    questionIndex);
                 break;
             }
             case GuidanceBlockType.Binary:
@@ -367,7 +296,6 @@ public partial class TelegramBot
 
                 messageText = MenuStrings.TestBinaryQuestion(question);
                 replyMarkup = BotKeyboards.TestBinaryQuestion(blockIndex, questionIndex);
-
                 break;
             }
             default:
@@ -382,43 +310,34 @@ public partial class TelegramBot
             text: messageText,
             parseMode: DefaultParseMode,
             replyMarkup: replyMarkup,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         return state;
     }
 
-    private State SaveAnswerToState(
-        State state,
-        int blockIndex,
-        int questionIndex,
-        string answerString
-    )
+    private State SaveAnswerToState(State state, int blockIndex, int questionIndex, string answerString)
     {
         var block = _guidanceProvider.Test.Blocks[blockIndex];
 
         switch (block.Type)
         {
-            case GuidanceBlockType.Options:
+            case GuidanceBlockType.Options when int.TryParse(answerString, out var answerIndex):
             {
                 var optionsBlock = (GuidanceOptionsBlock)block;
                 var question = optionsBlock.Questions[questionIndex];
-                var answer = question.Answers[int.Parse(answerString)];
+                var answer = question.Answers[answerIndex];
 
                 var typeRating = state.Data.TypeRatings.GetValueOrDefault(answer.TypeIndex);
                 state.Data.TypeRatings[answer.TypeIndex] = typeRating + 1;
-
                 break;
             }
-            case GuidanceBlockType.Binary:
+            case GuidanceBlockType.Binary when Enum.TryParse<GuidanceBinaryAnswer>(answerString, out var answer):
             {
                 var binaryBlock = (GuidanceBinaryBlock)block;
                 var question = binaryBlock.Questions[questionIndex];
-                var answerValue = int.Parse(answerString);
 
                 var typeRating = state.Data.TypeRatings.GetValueOrDefault(question.TypeIndex);
-                state.Data.TypeRatings[question.TypeIndex] = typeRating + answerValue;
-
+                state.Data.TypeRatings[question.TypeIndex] = typeRating + (int)answer;
                 break;
             }
             default:

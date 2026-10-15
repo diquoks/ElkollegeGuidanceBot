@@ -11,50 +11,35 @@ public static class BotKeyboards
     public static InlineKeyboardMarkup Start =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.StartTest)
-        );
+                .Append(BotButtons.StartTest));
 
     public static InlineKeyboardMarkup StartHasActiveTest =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.StartNewTest)
-        );
+                .Append(BotButtons.StartNewTest));
 
     public static InlineKeyboardMarkup PersonalDataAgreement =>
         new(
             new InlineKeyboardBuilder()
                 .Append(BotButtons.PersonalDataAgreement(true))
-                .Append(BotButtons.PersonalDataAgreement(false))
-        );
+                .Append(BotButtons.PersonalDataAgreement(false)));
 
     public static InlineKeyboardMarkup Instructions =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.InstructionsRead)
-        );
+                .Append(BotButtons.InstructionsRead));
 
     public static InlineKeyboardMarkup TestBlock(int blockIndex) =>
         new(
             new InlineKeyboardBuilder()
-                .Append(BotButtons.BlockContinue(blockIndex))
-        );
+                .Append(BotButtons.BlockContinue(blockIndex)));
 
-    public static InlineKeyboardMarkup TestOptionsQuestion(
-        int[] answerIndexes,
-        int blockIndex,
-        int questionIndex
-    )
+    public static InlineKeyboardMarkup TestOptionsQuestion(int[] answerIndexes, int blockIndex, int questionIndex)
     {
         var keyboardBuilder = new InlineKeyboardBuilder();
 
         var buttons = answerIndexes.Select((answerIndex, i) =>
-            BotButtons.OptionsQuestionAnswer(
-                blockIndex,
-                questionIndex,
-                answerIndex,
-                GuidanceOptionsAnswer.GetChar(i)
-            )
-        );
+            BotButtons.OptionsQuestionAnswer(blockIndex, questionIndex, answerIndex, GuidanceOptionsAnswer.GetChar(i)));
 
         foreach (var button in buttons)
             keyboardBuilder.Append(button);
@@ -66,10 +51,9 @@ public static class BotKeyboards
         new(
             new InlineKeyboardBuilder()
                 .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.Yes))
-                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.ProbablyYes))
-                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.ProbablyNo))
-                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.No))
-        );
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.LikelyYes))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.LikelyNo))
+                .Append(BotButtons.BinaryQuestionAnswer(blockIndex, questionIndex, GuidanceBinaryAnswer.No)));
 
     public static InlineKeyboardMarkup SelectUserStatus =>
         new(
@@ -79,6 +63,5 @@ public static class BotKeyboards
                 .Append(BotButtons.SelectUserStatus(UserStatus.CollegeStudent))
                 .Append(BotButtons.SelectUserStatus(UserStatus.UniversityStudent))
                 .AppendRow()
-                .Append(BotButtons.SelectUserStatus(UserStatus.Other))
-        );
+                .Append(BotButtons.SelectUserStatus(UserStatus.Other)));
 }

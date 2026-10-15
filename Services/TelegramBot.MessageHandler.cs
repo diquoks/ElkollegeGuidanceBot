@@ -11,16 +11,11 @@ namespace ElkollegeGuidanceBot.Services;
 
 public partial class TelegramBot
 {
-    protected override async Task OnMessageAsync(
-        Message message,
-        CancellationToken cancellationToken = default
-    )
+    protected override async Task OnMessageAsync(Message message, CancellationToken cancellationToken = default)
     {
-        if (
-            message.From is null ||
+        if (message.From is null ||
             message.From.Id == TelegramConstants.TelegramId ||
-            string.IsNullOrWhiteSpace(message.Text)
-        )
+            string.IsNullOrWhiteSpace(message.Text))
             return;
 
         if (BotCommandParser.TryParse(message, out _))
@@ -37,58 +32,47 @@ public partial class TelegramBot
             new
             {
                 State = state.Type
-            }
-        );
+            });
 
         switch (state.Type)
         {
             case StateType.InputFullName:
             {
-                state.Data.FullName = message.Text;
                 state.Type = StateType.InputPhoneNumber;
+                state.Data.FullName = message.Text;
 
                 await Client.SendMessageAsync(
                     chatId: message.Chat.Id,
                     text: MenuStrings.InputPhoneNumber,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
             case StateType.InputPhoneNumber:
             {
-                if (
-                    message.Entities?.FirstOrDefault(entity => entity.Type == MessageEntityTypes.PhoneNumber) is
-                    { } phoneNumberEntity
-                )
+                if (message.Entities?.FirstOrDefault(entity => entity.Type == MessageEntityTypes.PhoneNumber) is
+                    { } phoneNumberEntity)
                 {
                     state.Data.PhoneNumber = message.Text.Substring(phoneNumberEntity.Offset, phoneNumberEntity.Length);
                 }
                 else if (state.Data.PhoneNumberRetries < 3)
                 {
+                    state.Data.PhoneNumberRetries++;
+
                     await Client.SendMessageAsync(
                         chatId: message.Chat.Id,
                         text: MenuStrings.InputPhoneNumberError,
                         parseMode: DefaultParseMode,
-                        cancellationToken: cancellationToken
-                    );
-
-                    state.Data.PhoneNumberRetries++;
-
+                        cancellationToken: cancellationToken);
                     break;
                 }
 
                 state.Type = StateType.GuidanceTest;
 
-                const int firstBlockIndex = 0;
-
                 state = await ProceedToTestBlockAsync(
                     message,
                     state,
-                    firstBlockIndex,
-                    cancellationToken
-                );
-
+                    0,
+                    cancellationToken);
                 break;
             }
             case StateType.InputOtherUserStatus:
@@ -98,9 +82,7 @@ public partial class TelegramBot
                 state = await SendTestResultsAsync(
                     message,
                     state,
-                    cancellationToken
-                );
-
+                    cancellationToken);
                 break;
             }
             case StateType.InputInstitution:
@@ -112,9 +94,7 @@ public partial class TelegramBot
                     state = await SendTestResultsAsync(
                         message,
                         state,
-                        cancellationToken
-                    );
-
+                        cancellationToken);
                     break;
                 }
 
@@ -123,9 +103,7 @@ public partial class TelegramBot
                 await Client.SendMessageAsync(
                     chatId: message.Chat.Id,
                     text: MenuStrings.InputCurrentCourse,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
             case StateType.InputCurrentCourse:
@@ -135,9 +113,7 @@ public partial class TelegramBot
                 state = await SendTestResultsAsync(
                     message,
                     state,
-                    cancellationToken
-                );
-
+                    cancellationToken);
                 break;
             }
         }
@@ -151,8 +127,7 @@ public partial class TelegramBot
         Message message,
         State state,
         int blockIndex,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var block = _guidanceProvider.Test.Blocks[blockIndex];
 
@@ -163,8 +138,7 @@ public partial class TelegramBot
             text: MenuStrings.TestBlock(block),
             parseMode: DefaultParseMode,
             replyMarkup: BotKeyboards.TestBlock(blockIndex),
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
         return state;
     }
@@ -172,8 +146,7 @@ public partial class TelegramBot
     private async Task<State> SendTestResultsAsync(
         Message message,
         State state,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         var possibleType = _guidanceProvider.GetPossibleType(state);
 
@@ -181,13 +154,9 @@ public partial class TelegramBot
             chatId: message.Chat.Id,
             text: MenuStrings.TestResults(possibleType),
             parseMode: DefaultParseMode,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken);
 
-        await _databaseManager.InsertResultAsync(
-            _guidanceProvider.GetResult(state, possibleType),
-            cancellationToken
-        );
+        await _databaseManager.InsertResultAsync(_guidanceProvider.GetResult(state, possibleType), cancellationToken);
 
         state.Clear();
 

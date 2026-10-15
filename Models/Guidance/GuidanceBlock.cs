@@ -8,7 +8,7 @@ public interface IGuidanceBlock
 
     GuidanceBlockType Type { get; }
 
-    IReadOnlyList<GuidanceBlockQuestion> Questions { get; }
+    GuidanceBlockQuestion[] Questions { get; }
 }
 
 public abstract record GuidanceBlock<T> : IGuidanceBlock where T : GuidanceBlockQuestion
@@ -21,7 +21,7 @@ public abstract record GuidanceBlock<T> : IGuidanceBlock where T : GuidanceBlock
 
     public required T[] Questions { get; init; }
 
-    IReadOnlyList<GuidanceBlockQuestion> IGuidanceBlock.Questions => Questions;
+    GuidanceBlockQuestion[] IGuidanceBlock.Questions => [.. Questions];
 }
 
 public enum GuidanceBlockType

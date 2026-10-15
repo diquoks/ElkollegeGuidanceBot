@@ -25,8 +25,7 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
         GuidanceProvider guidanceProvider,
         DatabaseManager databaseManager,
         ILogger<TelegramBot> logger,
-        IConfiguration configuration
-    )
+        IConfiguration configuration)
     {
         _guidanceProvider = guidanceProvider;
         _databaseManager = databaseManager;
@@ -57,14 +56,15 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
     public async Task OnUpdateAsync(
         ITelegramBotClient _,
         Update update,
-        CancellationToken cancellationToken = default
-    ) => await OnUpdateAsync(update, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        await OnUpdateAsync(update, cancellationToken);
+    }
 
     public Task OnErrorAsync(
         ITelegramBotClient _,
         Exception exp,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -72,24 +72,26 @@ public partial class TelegramBot : SimpleUpdateHandlerBase
             {
                 case OperationCanceledException when !cancellationToken.IsCancellationRequested:
                     _logger.LogWarning(exp, "Request timed out.");
-                    return Task.CompletedTask;
+                    break;
 
                 case OperationCanceledException:
                     throw exp;
 
                 default:
                     _logger.LogError(exp, "An exception occurred.");
-                    return Task.CompletedTask;
+                    break;
             }
         }
         catch (Exception e)
         {
             return Task.FromException(e);
         }
+
+        return Task.CompletedTask;
     }
 
-    protected override async Task OnExceptionAsync(
-        Exception exp,
-        CancellationToken cancellationToken = default
-    ) => await OnErrorAsync(Client, exp, cancellationToken: cancellationToken);
+    protected override async Task OnExceptionAsync(Exception exp, CancellationToken cancellationToken = default)
+    {
+        await OnErrorAsync(Client, exp, cancellationToken: cancellationToken);
+    }
 }

@@ -91,10 +91,10 @@ public static class OtherStrings
         public const string Yes =
             "Да";
 
-        public const string ProbablyYes =
+        public const string LikelyYes =
             "Скорее да";
 
-        public const string ProbablyNo =
+        public const string LikelyNo =
             "Скорее нет";
 
         public const string No =

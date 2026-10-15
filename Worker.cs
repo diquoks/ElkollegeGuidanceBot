@@ -14,8 +14,7 @@ public class Worker(ILogger<Worker> logger, TelegramBot bot) : BackgroundService
             bot.OnUpdateAsync,
             bot.OnErrorAsync,
             new LongPollingOptions { DropPendingUpdates = true, Timeout = 10 },
-            stoppingToken
-        );
+            stoppingToken);
     }
 
     public override Task StopAsync(CancellationToken cancellationToken)

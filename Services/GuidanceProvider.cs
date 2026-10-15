@@ -21,17 +21,15 @@ public class GuidanceProvider
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .WithTypeDiscriminatingNodeDeserializer(options =>
-                {
-                    options.AddKeyValueTypeDiscriminator<IGuidanceBlock>(
-                        nameof(IGuidanceBlock.Type).ToLower(),
-                        new Dictionary<string, Type>
-                        {
-                            { nameof(GuidanceBlockType.Options), typeof(GuidanceOptionsBlock) },
-                            { nameof(GuidanceBlockType.Binary), typeof(GuidanceBinaryBlock) }
-                        }
-                    );
-                }
-            )
+            {
+                options.AddKeyValueTypeDiscriminator<IGuidanceBlock>(
+                    nameof(IGuidanceBlock.Type).ToLower(),
+                    new Dictionary<string, Type>
+                    {
+                        { nameof(GuidanceBlockType.Options), typeof(GuidanceOptionsBlock) },
+                        { nameof(GuidanceBlockType.Binary), typeof(GuidanceBinaryBlock) }
+                    });
+            })
             .Build();
 
         Test = deserializer.Deserialize<GuidanceTest>(File.ReadAllText(guidanceTestPath));

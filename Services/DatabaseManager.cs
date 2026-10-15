@@ -41,8 +41,7 @@ public class DatabaseManager
                 TypeRatings   TEXT    NOT NULL,
                 Created       TEXT    NOT NULL
             );
-            """
-        );
+            """);
     }
 
     public async Task<State> UpsertStateAsync(State state, CancellationToken cancellationToken = default)
@@ -60,9 +59,7 @@ public class DatabaseManager
                 RETURNING *;
                 """,
                 state,
-                cancellationToken: cancellationToken
-            )
-        );
+                cancellationToken: cancellationToken));
     }
 
     public async Task<State> GetUserStateAsync(long userId, CancellationToken cancellationToken = default)
@@ -73,9 +70,7 @@ public class DatabaseManager
             new CommandDefinition(
                 "SELECT * FROM states WHERE UserId = @UserId",
                 new { UserId = userId },
-                cancellationToken: cancellationToken
-            )
-        );
+                cancellationToken: cancellationToken));
 
         return state ?? await UpsertStateAsync(new State { UserId = userId }, cancellationToken);
     }
@@ -111,9 +106,7 @@ public class DatabaseManager
                 );
                 """,
                 result,
-                cancellationToken: cancellationToken
-            )
-        );
+                cancellationToken: cancellationToken));
     }
 
     public async Task<Result[]> GetAllResultsAsync(CancellationToken cancellationToken = default)
@@ -123,9 +116,7 @@ public class DatabaseManager
         await using var gridReader = await connection.QueryMultipleAsync(
             new CommandDefinition(
                 "SELECT * FROM results",
-                cancellationToken: cancellationToken
-            )
-        );
+                cancellationToken: cancellationToken));
 
         return [.. await gridReader.ReadAsync<Result>()];
     }

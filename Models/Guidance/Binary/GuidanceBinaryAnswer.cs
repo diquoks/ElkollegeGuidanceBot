@@ -8,11 +8,11 @@ public enum GuidanceBinaryAnswer
     [Description(OtherStrings.GuidanceBinaryAnswer.Yes)]
     Yes = 2,
 
-    [Description(OtherStrings.GuidanceBinaryAnswer.ProbablyYes)]
-    ProbablyYes = 1,
+    [Description(OtherStrings.GuidanceBinaryAnswer.LikelyYes)]
+    LikelyYes = 1,
 
-    [Description(OtherStrings.GuidanceBinaryAnswer.ProbablyNo)]
-    ProbablyNo = 0,
+    [Description(OtherStrings.GuidanceBinaryAnswer.LikelyNo)]
+    LikelyNo = 0,
 
     [Description(OtherStrings.GuidanceBinaryAnswer.No)]
     No = -1

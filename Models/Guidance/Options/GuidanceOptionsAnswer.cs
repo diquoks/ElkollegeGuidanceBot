@@ -9,6 +9,5 @@ public record GuidanceOptionsAnswer
 
     public required int TypeIndex { get; init; }
 
-    public static char GetChar(int answerIndex) =>
-        "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"[answerIndex];
+    public static char GetChar(int answerIndex) => "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"[answerIndex];
 }

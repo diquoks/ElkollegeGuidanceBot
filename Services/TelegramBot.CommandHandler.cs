@@ -14,13 +14,9 @@ public partial class TelegramBot
         Message message,
         string commandName,
         string args,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        if (
-            message.From is null ||
-            string.IsNullOrWhiteSpace(message.Text)
-        )
+        if (message.From is null || string.IsNullOrWhiteSpace(message.Text))
             return;
 
         var state = await _databaseManager.GetUserStateAsync(message.From.Id, cancellationToken);
@@ -33,22 +29,19 @@ public partial class TelegramBot
             {
                 State = state.Type,
                 IsAdmin = isAdmin
-            }
-        );
+            });
 
         switch (commandName)
         {
             case BotCommands.StartCommand:
             {
-                if (state.Type > StateType.Instructions)
+                if (state.Type > StateType.PersonalDataAgreement)
                 {
                     await Client.SendMessageAsync(
                         chatId: message.Chat.Id,
                         text: MenuStrings.StartHasActiveTest,
                         replyMarkup: BotKeyboards.StartHasActiveTest,
-                        cancellationToken: cancellationToken
-                    );
-
+                        cancellationToken: cancellationToken);
                     break;
                 }
 
@@ -57,9 +50,7 @@ public partial class TelegramBot
                     text: MenuStrings.Start(_botName),
                     parseMode: DefaultParseMode,
                     replyMarkup: BotKeyboards.Start,
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
             case BotCommands.ExportCommand:
@@ -93,9 +84,7 @@ public partial class TelegramBot
                 await Client.SendDocumentAsync(
                     chatId: message.Chat.Id,
                     document: new InputFile(workbookStream, "ElkollegeGuidanceExport.xlsx"),
-                    cancellationToken: cancellationToken
-                );
-
+                    cancellationToken: cancellationToken);
                 break;
             }
         }

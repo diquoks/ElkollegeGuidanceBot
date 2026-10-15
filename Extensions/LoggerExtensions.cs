@@ -23,8 +23,7 @@ public static class LoggerExtensions
                 userInfo,
                 user.Id,
                 interaction,
-                properties
-            );
+                properties);
         }
     }
 }

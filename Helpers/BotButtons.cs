@@ -42,8 +42,7 @@ public static class BotButtons
         int blockIndex,
         int questionIndex,
         int answerIndex,
-        char answerChar
-    ) =>
+        char answerChar) =>
         new(answerChar.ToString())
         {
             CallbackData = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex, answerIndex)
@@ -52,8 +51,7 @@ public static class BotButtons
     public static InlineKeyboardButton BinaryQuestionAnswer(
         int blockIndex,
         int questionIndex,
-        GuidanceBinaryAnswer answer
-    ) =>
+        GuidanceBinaryAnswer answer) =>
         new(answer.GetDescription())
         {
             CallbackData = CallbackStrings.TestAnswerCallback(blockIndex, questionIndex, (int)answer)

@@ -8,11 +8,11 @@ public static class CallbackStrings
     public const string PersonalDataAgreement =
         "personal_data_agreement";
 
+    public static string PersonalDataAgreementCallback(bool isAgree) =>
+        $"{PersonalDataAgreement} {isAgree}";
+
     public const string InstructionsRead =
         "instructions_read";
-
-    public static string PersonalDataAgreementCallback(bool isAgree) =>
-        $"{PersonalDataAgreement} {Convert.ToString(isAgree)}";
 
     public const string TestBlock =
         "test_block";
